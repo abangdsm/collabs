@@ -255,20 +255,40 @@ function showAddSubtask(taskId) {
 
 function deleteTask(taskId) {
     if(confirm('Yakin ingin menghapus judul tugas ini? Semua daftar tugas di dalamnya juga akan ikut terhapus!')) {
+        console.log('Mencoba hapus task ID:', taskId); // Untuk debugging
+        
         $.ajax({
-            url: baseUrl + '/api/delete_task.php',
+            url: baseUrl + '/api/delete_task.php',  // PASTIKAN baseUrl benar
             method: 'POST',
             data: { task_id: taskId },
             dataType: 'json',
+            timeout: 10000, // Timeout 10 detik
             success: function(response) {
+                console.log('Response:', response); // Untuk debugging
                 if(response.success) {
+                    alert('Tugas berhasil dihapus!');
                     location.reload();
                 } else {
                     alert('Gagal menghapus tugas: ' + response.message);
                 }
             },
-            error: function() {
-                alert('Terjadi kesalahan saat menghapus');
+            error: function(xhr, status, error) {
+                console.error('Error detail:', {
+                    status: status,
+                    error: error,
+                    response: xhr.responseText,
+                    statusCode: xhr.status
+                });
+                
+                let errorMsg = 'Terjadi kesalahan saat menghapus';
+                if (xhr.status === 404) {
+                    errorMsg = 'File API tidak ditemukan. Cek lokasi api/delete_task.php';
+                } else if (xhr.status === 500) {
+                    errorMsg = 'Error server: ' + (xhr.responseJSON?.message || 'Unknown error');
+                } else if (xhr.status === 403) {
+                    errorMsg = 'Anda tidak berhak menghapus tugas ini';
+                }
+                alert(errorMsg);
             }
         });
     }

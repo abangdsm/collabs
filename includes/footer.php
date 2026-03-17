@@ -7,6 +7,7 @@
     <script>
         // Define baseUrl untuk digunakan di JavaScript
         var baseUrl = '<?php echo $base_url; ?>';
+        console.log('Base URL:', baseUrl); // Untuk debugging
     </script>
     <script src="<?php echo $base_url; ?>/assets/js/main.js"></script>
     <script src="<?php echo $base_url; ?>/assets/js/notifications.js"></script>
