@@ -218,8 +218,11 @@ $base_url = base_url();
 </div>
 
 <script>
-// Load subtasks for each task
+// PASTIKAN SEMUA KODE JQUERY BERADA DI DALAM .ready()
 $(document).ready(function() {
+    console.log('Dashboard ready, jQuery version:', $.fn.jquery);
+    
+    // Load subtasks for each task
     $('.subtask-list').each(function() {
         var taskId = $(this).data('task-id');
         loadSubtasks(taskId);
@@ -236,14 +239,28 @@ $(document).ready(function() {
             applyFilters();
         }
     });
+    
+    // Reset form modal ketika ditutup
+    $('#modalSubtask').on('hidden.bs.modal', function () {
+        $('#formSubtask')[0].reset();
+    });
 });
 
+// FUNGSI-FUNGSI DILUAR .ready() TAPI TETAP AMAN KARENA DIPANGGIL DARI DALAM .ready()
 function loadSubtasks(taskId) {
+    if (typeof $ === 'undefined') {
+        console.error('jQuery not loaded!');
+        return;
+    }
+    
     $.ajax({
         url: baseUrl + '/api/get_subtasks.php',
         data: { task_id: taskId },
         success: function(data) {
             $('.subtask-list[data-task-id="' + taskId + '"]').html(data);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error load subtasks:', error);
         }
     });
 }
@@ -255,38 +272,47 @@ function showAddSubtask(taskId) {
 
 function deleteTask(taskId) {
     if(confirm('Yakin ingin menghapus judul tugas ini? Semua daftar tugas di dalamnya juga akan ikut terhapus!')) {
-        console.log('Mencoba hapus task ID:', taskId); // Untuk debugging
+        console.log('Mencoba hapus task ID:', taskId);
+        console.log('Base URL:', baseUrl);
+        console.log('Full URL:', baseUrl + '/api/delete_task.php');
         
         $.ajax({
-            url: baseUrl + '/api/delete_task.php',  // PASTIKAN baseUrl benar
+            url: baseUrl + '/api/delete_task.php',
             method: 'POST',
             data: { task_id: taskId },
             dataType: 'json',
-            timeout: 10000, // Timeout 10 detik
+            timeout: 10000,
             success: function(response) {
-                console.log('Response:', response); // Untuk debugging
+                console.log('Response success:', response);
                 if(response.success) {
-                    alert('Tugas berhasil dihapus!');
+                    alert('✅ Tugas berhasil dihapus!');
                     location.reload();
                 } else {
-                    alert('Gagal menghapus tugas: ' + response.message);
+                    alert('❌ Gagal: ' + response.message);
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error detail:', {
                     status: status,
                     error: error,
-                    response: xhr.responseText,
+                    responseText: xhr.responseText,
                     statusCode: xhr.status
                 });
                 
-                let errorMsg = 'Terjadi kesalahan saat menghapus';
-                if (xhr.status === 404) {
-                    errorMsg = 'File API tidak ditemukan. Cek lokasi api/delete_task.php';
+                let errorMsg = '❌ Terjadi kesalahan: ';
+                if (xhr.status === 405) {
+                    errorMsg += 'Method tidak diizinkan';
+                } else if (xhr.status === 404) {
+                    errorMsg += 'File API tidak ditemukan';
                 } else if (xhr.status === 500) {
-                    errorMsg = 'Error server: ' + (xhr.responseJSON?.message || 'Unknown error');
-                } else if (xhr.status === 403) {
-                    errorMsg = 'Anda tidak berhak menghapus tugas ini';
+                    try {
+                        var resp = JSON.parse(xhr.responseText);
+                        errorMsg += resp.message || 'Internal server error';
+                    } catch(e) {
+                        errorMsg += 'Internal server error';
+                    }
+                } else {
+                    errorMsg += error || 'Unknown error';
                 }
                 alert(errorMsg);
             }
@@ -294,7 +320,6 @@ function deleteTask(taskId) {
     }
 }
 
-// Fungsi untuk apply filter (akan diimplementasi nanti)
 function applyFilters() {
     var status = $('#filterStatus').val();
     var priority = $('#filterPriority').val();
@@ -303,15 +328,9 @@ function applyFilters() {
     
     console.log('Filter:', {status, priority, deadline, search});
     
-    // Nanti akan dipanggil API filter
-    // Untuk sekarang, kita reload halaman dengan parameter
-    // window.location.href = baseUrl + '/modules/dashboard.php?status=' + status + '&priority=' + priority + '&deadline=' + deadline + '&search=' + encodeURIComponent(search);
+    // Nanti akan diimplementasi
+    alert('Fitur filter akan segera hadir!');
 }
-
-// Reset form modal ketika ditutup
-$('#modalSubtask').on('hidden.bs.modal', function () {
-    $('#formSubtask')[0].reset();
-});
 </script>
 
 <?php 
