@@ -4,6 +4,7 @@ require_once 'functions.php';  // functions.php sudah ada session_start()
 
 // Cek apakah user login untuk menentukan tampilan navbar
 $isLoggedIn = isLoggedIn();
+$base_url = base_url(); // Simpan base_url ke variabel
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -13,25 +14,25 @@ $isLoggedIn = isLoggedIn();
     <title>Collabs - <?php echo $page_title ?? 'Platform Kolaborasi'; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo base_url('/assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>/assets/css/style.css">
 </head>
 <body>
     <?php if ($isLoggedIn): ?>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?php echo base_url('/modules/dashboard.php'); ?>">Collabs</a>
+            <a class="navbar-brand" href="<?php echo $base_url; ?>/modules/dashboard.php">Collabs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo base_url('/modules/dashboard.php'); ?>">
+                        <a class="nav-link" href="<?php echo $base_url; ?>/modules/dashboard.php">
                             <i class="bi bi-house-door"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo base_url('/modules/archive.php'); ?>">
+                        <a class="nav-link" href="<?php echo $base_url; ?>/modules/archive.php">
                             <i class="bi bi-archive"></i> Arsip
                         </a>
                     </li>
@@ -54,7 +55,7 @@ $isLoggedIn = isLoggedIn();
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profil</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?php echo base_url('/modules/auth/logout.php'); ?>">
+                            <li><a class="dropdown-item" href="<?php echo $base_url; ?>/modules/auth/logout.php">
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </a></li>
                         </ul>

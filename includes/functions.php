@@ -14,7 +14,7 @@ function isLoggedIn() {
 // Redirect jika belum login
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: ' . base_url('/modules/auth/login.php'));
+        header('Location: ' . base_url() . '/modules/auth/login.php');
         exit();
     }
 }
@@ -67,28 +67,15 @@ function checkDeadlines() {
     $conn->close();
 }
 
-// Base URL function - PERBAIKAN DISINI
-function base_url($path = '') {
+// Base URL function - VERSI SEDERHANA
+function base_url() {
     // Deteksi protocol (http atau https)
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
     
     // Dapatkan host (localhost atau domain)
     $host = $_SERVER['HTTP_HOST'];
     
-    // Dapatkan path ke folder project
-    $script_name = $_SERVER['SCRIPT_NAME'];
-    $folder = str_replace('\\', '/', dirname($script_name));
-    
-    // Hapus 'modules/auth' atau bagian lain dari path untuk mendapatkan base folder
-    $base_folder = preg_replace('#/(modules|auth|tasks|api)/.*$#', '', $folder);
-    
-    $base_url = $protocol . $host . $base_folder;
-    
-    if (!empty($path)) {
-        // Pastikan tidak ada double slash
-        return rtrim($base_url, '/') . '/' . ltrim($path, '/');
-    }
-    
-    return $base_url;
+    // Untuk Laragon, folder project ada di /collabs/
+    return $protocol . $host . '/collabs';
 }
 ?>

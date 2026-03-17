@@ -18,6 +18,8 @@ $tasks = $conn->query("
     JOIN users u ON t.created_by = u.id
     ORDER BY t.created_at DESC
 ");
+
+$base_url = base_url(); // Untuk digunakan di JavaScript
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">

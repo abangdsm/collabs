@@ -4,7 +4,7 @@ require_once '../../includes/header.php';
 
 // Cek apakah sudah login
 if (isLoggedIn()) {
-    header('Location: ' . base_url('/modules/dashboard.php'));
+    header('Location: ' . base_url() . '/modules/dashboard.php');
     exit();
 }
 
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Catat activity log
             logActivity($user['id'], 'Login');
             
-            header('Location: ' . base_url('/modules/dashboard.php'));
+            header('Location: ' . base_url() . '/modules/dashboard.php');
             exit();
         } else {
             $error = "Password salah!";
@@ -42,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $conn->close();
 }
+
+$base_url = base_url(); // Untuk digunakan di form action jika perlu
 ?>
 
 <div class="row justify-content-center">

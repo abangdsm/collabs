@@ -10,7 +10,7 @@ if (isset($_SESSION['user_id'])) {
 // Hapus semua session
 session_destroy();
 
-// Redirect ke halaman login
-header('Location: login.php');
+// Redirect ke halaman login - PASTIKAN PAKAI BASE_URL
+header('Location: ' . base_url() . '/modules/auth/login.php');
 exit();
 ?>
