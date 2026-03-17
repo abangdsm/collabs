@@ -62,4 +62,12 @@ function checkDeadlines() {
     
     $conn->close();
 }
+
+function base_url($path = '') {
+    $base = 'http://localhost/collabs';
+    if (!empty($path)) {
+        return $base . '/' . ltrim($path, '/');
+    }
+    return $base;
+}
 ?>
