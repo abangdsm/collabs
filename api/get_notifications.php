@@ -3,9 +3,19 @@ require_once '../includes/functions.php';
 requireLogin();
 
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
 
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
+
+// Cek koneksi
+if ($conn->connect_error) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Koneksi database gagal'
+    ]);
+    exit();
+}
 
 // Ambil 15 notifikasi terbaru
 $result = $conn->query("
@@ -15,48 +25,72 @@ $result = $conn->query("
     LIMIT 15
 ");
 
+if (!$result) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Query error: ' . $conn->error
+    ]);
+    $conn->close();
+    exit();
+}
+
 $notifications = [];
 while ($row = $result->fetch_assoc()) {
     // Format pesan dengan emoji berdasarkan type
     $emoji = '';
     switch ($row['type']) {
-        case 'success': $emoji = '✅ '; break;
-        case 'warning': $emoji = '⚠️ '; break;
-        case 'danger': $emoji = '🔴 '; break;
-        default: $emoji = '📢 '; break;
+        case 'success':
+            $emoji = '✅ ';
+            break;
+        case 'warning':
+            $emoji = '⚠️ ';
+            break;
+        case 'danger':
+            $emoji = '🔴 ';
+            break;
+        default:
+            $emoji = '📢 ';
+            break;
     }
-    
+
+    // Kirim tanpa emoji, nanti di JS yang kasih
     $notifications[] = [
-        'id' => $row['id'],
-        'message' => $emoji . $row['message'],
+        'id' => (int)$row['id'],
+        'message' => $row['message'], // LANGSUNG tanpa emoji
         'type' => $row['type'],
         'is_read' => (int)$row['is_read'],
-        'link' => $row['link'],
+        'link' => $row['link'] ?? '',
         'created_at' => waktuLalu($row['created_at'])
     ];
 }
 
 // Hitung notifikasi yang belum dibaca
 $unread = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE user_id = $user_id AND is_read = 0");
-$unread_count = $unread->fetch_assoc()['total'];
+$unread_count = 0;
+if ($unread) {
+    $row = $unread->fetch_assoc();
+    $unread_count = (int)$row['total'];
+}
 
 echo json_encode([
     'success' => true,
     'notifications' => $notifications,
-    'unread_count' => (int)$unread_count
+    'unread_count' => $unread_count
 ]);
 
 $conn->close();
 
-function waktuLalu($datetime) {
+function waktuLalu($datetime)
+{
+    if (!$datetime) return '';
+
     $waktu = strtotime($datetime);
     $sekarang = time();
     $diff = $sekarang - $waktu;
-    
+
     if ($diff < 60) return "baru saja";
-    if ($diff < 3600) return floor($diff/60) . " menit lalu";
-    if ($diff < 86400) return floor($diff/3600) . " jam lalu";
-    if ($diff < 259200) return floor($diff/86400) . " hari lalu";
-    return date('d/m/Y', $waktu);
+    if ($diff < 3600) return floor($diff / 60) . " menit lalu";
+    if ($diff < 86400) return floor($diff / 3600) . " jam lalu";
+    if ($diff < 259200) return floor($diff / 86400) . " hari lalu";
+    return date('d/m/Y H:i', $waktu);
 }
-?>
