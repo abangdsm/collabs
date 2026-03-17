@@ -72,3 +72,29 @@
 .deadline-normal {
     color: #198754;
 }
+
+/* Style untuk komentar */
+.comment-item {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.comments-container {
+    font-size: 0.9rem;
+}
+
+.border-start {
+    border-left: 2px solid #dee2e6 !important;
+}
+
+/* Avatar circle */
+.rounded-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
