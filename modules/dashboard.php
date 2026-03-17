@@ -44,46 +44,88 @@ $base_url = base_url();
     </button>
 </div>
 
-<!-- Filter Section (sama seperti sebelumnya) -->
+<!-- FILTER SECTION - LENGKAP -->
 <div class="card mb-4">
-    <!-- ... filter section tetap sama ... -->
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <select class="form-select" id="filterStatus">
+                    <option value="">Semua Status</option>
+                    <option value="proses">Dalam Proses</option>
+                    <option value="selesai">Selesai</option>
+                    <option value="evaluasi">Evaluasi</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="filterPriority">
+                    <option value="">Semua Prioritas</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterDeadline">
+                    <option value="">Semua Deadline</option>
+                    <option value="today">Hari ini</option>
+                    <option value="tomorrow">Besok</option>
+                    <option value="week">Minggu ini</option>
+                    <option value="overdue">Sudah lewat</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Cari tugas..." id="searchInput">
+                    <button class="btn btn-primary" type="button" id="btnSearch">
+                        <i class="bi bi-search"></i> Cari
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Tasks Container -->
 <div id="tasks-container">
-    <?php while($task = $tasks->fetch_assoc()): ?>
-    <div class="card mb-3 task-card" data-task-id="<?php echo $task['id']; ?>">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><?php echo htmlspecialchars($task['judul']); ?></h5>
-            <div>
-                <small class="text-muted me-3">Dibuat oleh: <?php echo $task['creator']; ?></small>
-                
-                <!-- Tampilkan tombol Edit untuk admin ATAU pembuat tugas -->
-                <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
-                    <a href="tasks/edit.php?id=<?php echo $task['id']; ?>" class="btn btn-sm btn-outline-primary me-1">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                <?php endif; ?>
-                
-                <!-- Tombol Delete hanya untuk admin ATAU pembuat tugas -->
-                <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(<?php echo $task['id']; ?>)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                <?php endif; ?>
+    <?php if ($tasks->num_rows == 0): ?>
+        <div class="alert alert-info">
+            Belum ada judul tugas. Klik tombol "Buat Judul Tugas Baru" untuk memulai.
+        </div>
+    <?php else: ?>
+        <?php while($task = $tasks->fetch_assoc()): ?>
+        <div class="card mb-3 task-card" data-task-id="<?php echo $task['id']; ?>">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><?php echo htmlspecialchars($task['judul']); ?></h5>
+                <div>
+                    <small class="text-muted me-3">Dibuat oleh: <?php echo $task['creator']; ?></small>
+                    
+                    <!-- Tampilkan tombol Edit untuk admin ATAU pembuat tugas -->
+                    <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
+                        <a href="tasks/edit.php?id=<?php echo $task['id']; ?>" class="btn btn-sm btn-outline-primary me-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    <?php endif; ?>
+                    
+                    <!-- Tombol Delete hanya untuk admin ATAU pembuat tugas -->
+                    <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(<?php echo $task['id']; ?>)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Subtasks akan diload via AJAX -->
+                <div class="subtask-list" data-task-id="<?php echo $task['id']; ?>">
+                    <p class="text-muted">Loading subtasks...</p>
+                </div>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="showAddSubtask(<?php echo $task['id']; ?>)">
+                    <i class="bi bi-plus"></i> Tambah Daftar Tugas
+                </button>
             </div>
         </div>
-        <div class="card-body">
-            <!-- Subtasks akan diload via AJAX -->
-            <div class="subtask-list" data-task-id="<?php echo $task['id']; ?>">
-                <p class="text-muted">Loading subtasks...</p>
-            </div>
-            <button class="btn btn-sm btn-outline-primary mt-2" onclick="showAddSubtask(<?php echo $task['id']; ?>)">
-                <i class="bi bi-plus"></i> Tambah Daftar Tugas
-            </button>
-        </div>
-    </div>
-    <?php endwhile; ?>
+        <?php endwhile; ?>
+    <?php endif; ?>
 </div>
 
 <!-- Modal for CREATE Task -->
@@ -111,7 +153,7 @@ $base_url = base_url();
     </div>
 </div>
 
-<!-- Modal for CREATE Subtask (akan diisi nanti) -->
+<!-- Modal for CREATE Subtask -->
 <div class="modal fade" id="modalSubtask" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -163,6 +205,7 @@ $base_url = base_url();
                         <label for="subtask_link" class="form-label">Link Eksternal (Opsional)</label>
                         <input type="url" class="form-control" id="subtask_link" name="link" 
                                placeholder="https://drive.google.com/...">
+                        <small class="text-muted">Link ke Google Drive atau dokumen eksternal</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -180,6 +223,18 @@ $(document).ready(function() {
     $('.subtask-list').each(function() {
         var taskId = $(this).data('task-id');
         loadSubtasks(taskId);
+    });
+    
+    // Event listener untuk filter dan search
+    $('#filterStatus, #filterPriority, #filterDeadline, #btnSearch').on('change click', function() {
+        applyFilters();
+    });
+    
+    // Search juga bisa dengan tekan Enter
+    $('#searchInput').on('keypress', function(e) {
+        if (e.which == 13) {
+            applyFilters();
+        }
     });
 });
 
@@ -217,6 +272,20 @@ function deleteTask(taskId) {
             }
         });
     }
+}
+
+// Fungsi untuk apply filter (akan diimplementasi nanti)
+function applyFilters() {
+    var status = $('#filterStatus').val();
+    var priority = $('#filterPriority').val();
+    var deadline = $('#filterDeadline').val();
+    var search = $('#searchInput').val();
+    
+    console.log('Filter:', {status, priority, deadline, search});
+    
+    // Nanti akan dipanggil API filter
+    // Untuk sekarang, kita reload halaman dengan parameter
+    // window.location.href = baseUrl + '/modules/dashboard.php?status=' + status + '&priority=' + priority + '&deadline=' + deadline + '&search=' + encodeURIComponent(search);
 }
 
 // Reset form modal ketika ditutup
