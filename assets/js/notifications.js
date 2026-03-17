@@ -9,7 +9,7 @@ $(document).ready(function() {
     // Cek notifikasi pertama kali saat halaman dimuat
     setTimeout(function() {
         checkNotifications();
-    }, 500); // Delay 500ms biar halaman stabil dulu
+    }, 500);
     
     // Cek notifikasi setiap 10 detik
     setInterval(checkNotifications, 10000);
@@ -63,11 +63,10 @@ function checkNotifications() {
         method: 'GET',
         dataType: 'json',
         cache: false,
-        timeout: 8000, // Timeout 8 detik
+        timeout: 8000,
         success: function(response) {
             console.log('✅ Response notifikasi:', response);
             
-            // Validasi response
             if (!response) {
                 console.error('Response kosong');
                 showNotifError('Response kosong');
@@ -80,10 +79,7 @@ function checkNotifications() {
                 return;
             }
             
-            // Update badge notifikasi
             updateNotifBadge(response.unread_count);
-            
-            // Update daftar notifikasi
             updateNotifList(response.notifications);
         },
         error: function(xhr, status, error) {
@@ -116,8 +112,6 @@ function updateNotifBadge(unreadCount) {
     
     if (unreadCount > 0) {
         $('#notif-badge').text(unreadCount).show();
-        
-        // Efek kedip untuk menarik perhatian
         $('#notif-badge').fadeOut(150).fadeIn(150).fadeOut(150).fadeIn(150);
     } else {
         $('#notif-badge').hide();
@@ -125,7 +119,7 @@ function updateNotifBadge(unreadCount) {
 }
 
 /**
- * Update daftar notifikasi di dropdown
+ * Update daftar notifikasi di dropdown - PAKAI BOOTSTRAP ICONS
  */
 function updateNotifList(notifications) {
     console.log('Update daftar notifikasi - jumlah:', notifications ? notifications.length : 0);
@@ -133,27 +127,36 @@ function updateNotifList(notifications) {
     var notifHtml = '';
     
     if (notifications && notifications.length > 0) {
-        // Loop semua notifikasi
         notifications.forEach(function(notif) {
-            // Tentukan class berdasarkan status baca
             var bgClass = notif.is_read ? '' : 'bg-warning bg-opacity-10';
             
-            // Bersihkan pesan dari emoji dobel
-            var cleanMessage = notif.message.replace(/^[📢✅⚠️🔴\s]+/, '');
+            // Tentukan icon berdasarkan type - PAKAI BOOTSTRAP ICONS
+            var icon = '';
+            switch (notif.type) {
+                case 'success':
+                    icon = '<i class="bi bi-check-circle-fill text-success" style="font-size: 1.1rem;"></i>';
+                    break;
+                case 'warning':
+                    icon = '<i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 1.1rem;"></i>';
+                    break;
+                case 'danger':
+                    icon = '<i class="bi bi-x-circle-fill text-danger" style="font-size: 1.1rem;"></i>';
+                    break;
+                case 'info':
+                default:
+                    icon = '<i class="bi bi-chat-dots-fill text-primary" style="font-size: 1.1rem;"></i>';
+                    break;
+            }
             
             notifHtml += '<a class="dropdown-item notif-item px-3 py-2 ' + bgClass + '" href="#" ' +
                        'data-notif-id="' + notif.id + '" ' +
                        'data-link="' + (notif.link || '') + '" ' +
                        'style="border-bottom: 1px solid #eee; white-space: normal; word-wrap: break-word;">' +
                 '<div class="d-flex">' +
-                '<span class="me-2" style="font-size: 1.1rem;">' + 
-                    (notif.type == 'success' ? '✅' : 
-                     notif.type == 'warning' ? '⚠️' : 
-                     notif.type == 'danger' ? '🔴' : '📢') + 
-                '</span>' +
+                '<span class="me-2">' + icon + '</span>' +
                 '<div class="flex-grow-1">' +
                 '<div style="font-size: 0.9rem; line-height: 1.4; ' + (notif.is_read ? '' : 'font-weight: 500;') + '">' + 
-                    cleanMessage + 
+                    notif.message + 
                 '</div>' +
                 '<small class="text-muted d-block mt-1" style="font-size: 0.75rem;">' + notif.created_at + '</small>' +
                 '</div>' +
@@ -161,20 +164,17 @@ function updateNotifList(notifications) {
                 '</a>';
         });
         
-        // Tambahkan tombol "Tandai semua"
         notifHtml += '<div class="dropdown-divider my-0"></div>' +
             '<a class="dropdown-item text-center py-2" href="#" id="markAllRead" ' +
             'style="font-size: 0.85rem; background-color: #f8f9fa;">' +
             '<i class="bi bi-check2-all me-1"></i> Tandai semua sudah dibaca</a>';
     } else {
-        // Tidak ada notifikasi
         notifHtml = '<div class="text-muted text-center p-4">' +
             '<i class="bi bi-bell-slash d-block mb-2" style="font-size: 2rem;"></i>' +
             '<span style="font-size: 0.9rem;">Tidak ada notifikasi</span>' +
             '</div>';
     }
     
-    // Update ke DOM
     $('#notif-content').html(notifHtml);
     console.log('✅ Daftar notifikasi telah diupdate');
 }
@@ -207,7 +207,6 @@ function markAsRead(notifId) {
             console.log('Response mark as read:', response);
             
             if (response.success) {
-                // Update badge (kurangi 1)
                 var currentCount = parseInt($('#notif-badge').text() || 0);
                 $('#notif-badge').text(Math.max(0, currentCount - 1));
                 
@@ -215,7 +214,6 @@ function markAsRead(notifId) {
                     $('#notif-badge').hide();
                 }
                 
-                // Refresh daftar notifikasi
                 checkNotifications();
             } else {
                 console.error('Gagal mark as read:', response.message);
@@ -243,13 +241,8 @@ function markAllAsRead() {
             console.log('Response mark all as read:', response);
             
             if (response.success) {
-                // Sembunyikan badge
                 $('#notif-badge').hide();
-                
-                // Refresh daftar notifikasi
                 checkNotifications();
-                
-                // Tampilkan pesan sukses
                 alert('✅ Semua notifikasi telah ditandai sudah dibaca');
             } else {
                 console.error('Gagal mark all as read:', response.message);

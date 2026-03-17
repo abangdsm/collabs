@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         logActivity($created_by, "Menambahkan task ID: $task_id - $judul");
         
         // NOTIFIKASI: Beri tahu semua anggota (kecuali dirinya sendiri)
-        $notif_message = "📋 $username menambahkan project baru: \"$judul\"";
+        $notif_message = "$username menambahkan project baru: \"$judul\"";
         notifyAllMembers($notif_message, 'info', $created_by, base_url() . "/modules/dashboard.php#task-$task_id");
         
         $_SESSION['success'] = "Judul tugas berhasil ditambahkan!";

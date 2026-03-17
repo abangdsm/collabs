@@ -5,6 +5,9 @@ requireLogin();
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, must-revalidate');
 
+// Set timezone ke Jakarta
+date_default_timezone_set('Asia/Jakarta');
+
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
 
@@ -36,28 +39,13 @@ if (!$result) {
 
 $notifications = [];
 while ($row = $result->fetch_assoc()) {
-    // Format pesan dengan emoji berdasarkan type
-    $emoji = '';
-    switch ($row['type']) {
-        case 'success':
-            $emoji = '✅ ';
-            break;
-        case 'warning':
-            $emoji = '⚠️ ';
-            break;
-        case 'danger':
-            $emoji = '🔴 ';
-            break;
-        default:
-            $emoji = '📢 ';
-            break;
-    }
-
-    // Kirim tanpa emoji, nanti di JS yang kasih
+    // HAPUS EMOJI DARI SINI - SERAHIN KE JAVASCRIPT
+    // Cuma kirim type dan message mentah
+    
     $notifications[] = [
         'id' => (int)$row['id'],
-        'message' => $row['message'], // LANGSUNG tanpa emoji
-        'type' => $row['type'],
+        'message' => $row['message'], // Teks murni tanpa emoji
+        'type' => $row['type'], // 'info', 'success', 'warning', 'danger'
         'is_read' => (int)$row['is_read'],
         'link' => $row['link'] ?? '',
         'created_at' => waktuLalu($row['created_at'])
@@ -79,3 +67,4 @@ echo json_encode([
 ]);
 
 $conn->close();
+?>

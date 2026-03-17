@@ -8,8 +8,6 @@ include '../../includes/header.php';
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
 
-// ... sisanya tetap sama ...
-
 // Pagination
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 20;
@@ -34,79 +32,69 @@ $unread_count = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE 
 ?>
 
 <style>
-.notif-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-}
+    .notif-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
 
-.notif-icon.info { background-color: #e3f2fd; color: #0d6efd; }
-.notif-icon.success { background-color: #d1e7dd; color: #198754; }
-.notif-icon.warning { background-color: #fff3cd; color: #ffc107; }
-.notif-icon.danger { background-color: #f8d7da; color: #dc3545; }
+    .notif-icon.info {
+        background-color: #e3f2fd;
+        color: #0d6efd;
+    }
 
-.notif-item {
-    transition: background-color 0.2s;
-    border-left: 3px solid transparent;
-}
+    .notif-icon.success {
+        background-color: #d1e7dd;
+        color: #198754;
+    }
 
-.notif-item.unread {
-    background-color: #f0f7ff;
-    border-left-color: #0d6efd;
-}
+    .notif-icon.warning {
+        background-color: #fff3cd;
+        color: #ffc107;
+    }
 
-.notif-item:hover {
-    background-color: #f8f9fa;
-}
+    .notif-icon.danger {
+        background-color: #f8d7da;
+        color: #dc3545;
+    }
 
-.notif-time {
-    font-size: 0.75rem;
-    color: #6c757d;
-}
+    .notif-item {
+        transition: background-color 0.2s;
+        border-left: 3px solid transparent;
+        cursor: pointer;
+    }
 
-.mark-read-btn {
-    opacity: 0;
-    transition: opacity 0.2s;
-}
+    .notif-item.unread {
+        background-color: #f0f7ff;
+        border-left-color: #0d6efd;
+    }
 
-.notif-item:hover .mark-read-btn {
-    opacity: 1;
-}
+    .notif-item:hover {
+        background-color: #f8f9fa;
+    }
 
-.notif-item {
-    transition: background-color 0.2s;
-    border-left: 3px solid transparent;
-    cursor: pointer; /* TAMBAHKAN INI */
-}
+    .notif-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
 
-.notif-item:hover {
-    background-color: #f8f9fa;
-}
+    .mark-read-btn {
+        opacity: 0;
+        transition: opacity 0.2s;
+        cursor: default;
+    }
 
-.notif-item.unread {
-    background-color: #f0f7ff;
-    border-left-color: #0d6efd;
-}
+    .notif-item:hover .mark-read-btn {
+        opacity: 1;
+    }
 
-/* Tombol mark as read tetap pakai cursor default */
-.mark-read-btn {
-    opacity: 0;
-    transition: opacity 0.2s;
-    cursor: default; /* TAMBAHKAN INI */
-}
-
-.notif-item:hover .mark-read-btn {
-    opacity: 1;
-}
-
-/* Kecuali tombol, tetap pakai pointer */
-.mark-read-btn:hover {
-    cursor: pointer !important;
-}
+    .mark-read-btn:hover {
+        cursor: pointer !important;
+    }
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -142,36 +130,52 @@ $unread_count = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE 
 <div class="card shadow-sm" id="notifications-list">
     <div class="list-group list-group-flush" id="notif-container">
         <?php if ($result->num_rows > 0): ?>
-            <?php while($notif = $result->fetch_assoc()): 
+            <?php while ($notif = $result->fetch_assoc()):
+                // Tentukan icon berdasarkan type
+                $icon = '';
+                switch ($notif['type']) {
+                    case 'success':
+                        $icon = '<i class="bi bi-check-circle-fill text-success"></i>';
+                        break;
+                    case 'warning':
+                        $icon = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+                        break;
+                    case 'danger':
+                        $icon = '<i class="bi bi-x-circle-fill text-danger"></i>';
+                        break;
+                    default:
+                        $icon = '<i class="bi bi-chat-dots-fill text-primary"></i>';
+                        break;
+                }
+
                 $icon_class = $notif['type'];
-                $icon = $notif['type'] == 'success' ? '✅' : ($notif['type'] == 'warning' ? '⚠️' : ($notif['type'] == 'danger' ? '🔴' : '📢'));
                 $unread_class = $notif['is_read'] ? '' : 'unread';
                 $waktu = waktuLalu($notif['created_at']);
             ?>
-            <div class="list-group-item notif-item <?php echo $unread_class; ?>" data-notif-id="<?php echo $notif['id']; ?>" data-link="<?php echo $notif['link'] ?? ''; ?>">
-                <div class="d-flex align-items-start">
-                    <div class="notif-icon <?php echo $icon_class; ?> me-3">
-                        <?php echo $icon; ?>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <p class="mb-1 <?php echo $notif['is_read'] ? '' : 'fw-semibold'; ?>">
-                                    <?php echo htmlspecialchars($notif['message']); ?>
-                                </p>
-                                <small class="notif-time">
-                                    <i class="bi bi-clock me-1"></i> <?php echo $waktu; ?>
-                                </small>
+                <div class="list-group-item notif-item <?php echo $unread_class; ?>" data-notif-id="<?php echo $notif['id']; ?>" data-link="<?php echo $notif['link'] ?? ''; ?>">
+                    <div class="d-flex align-items-start">
+                        <div class="notif-icon <?php echo $icon_class; ?> me-3">
+                            <?php echo $icon; ?>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="mb-1 <?php echo $notif['is_read'] ? '' : 'fw-semibold'; ?>">
+                                        <?php echo htmlspecialchars($notif['message']); ?>
+                                    </p>
+                                    <small class="notif-time">
+                                        <i class="bi bi-clock me-1"></i> <?php echo $waktu; ?>
+                                    </small>
+                                </div>
+                                <?php if (!$notif['is_read']): ?>
+                                    <button class="btn btn-sm btn-link mark-read-btn" onclick="markAsRead(<?php echo $notif['id']; ?>, this)">
+                                        <i class="bi bi-check"></i> Tandai dibaca
+                                    </button>
+                                <?php endif; ?>
                             </div>
-                            <?php if (!$notif['is_read']): ?>
-                            <button class="btn btn-sm btn-link mark-read-btn" onclick="markAsRead(<?php echo $notif['id']; ?>, this)">
-                                <i class="bi bi-check"></i> Tandai dibaca
-                            </button>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            </div>
             <?php endwhile; ?>
         <?php else: ?>
             <div class="text-center py-5">
@@ -180,121 +184,127 @@ $unread_count = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE 
             </div>
         <?php endif; ?>
     </div>
-    
+
     <!-- Pagination -->
     <?php if ($total_pages > 1): ?>
-    <div class="card-footer bg-white">
-        <nav aria-label="Pagination notifikasi">
-            <ul class="pagination justify-content-center mb-0">
-                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $page-1; ?>">Sebelumnya</a>
-                </li>
-                
-                <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                </li>
-                <?php endfor; ?>
-                
-                <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $page+1; ?>">Selanjutnya</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+        <div class="card-footer bg-white">
+            <nav aria-label="Pagination notifikasi">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="?page=<?php echo $page - 1; ?>">Sebelumnya</a>
+                    </li>
+
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="?page=<?php echo $page + 1; ?>">Selanjutnya</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     <?php endif; ?>
 </div>
 
 <script>
-$(document).ready(function() {
-    // Klik pada notifikasi
-    $('.notif-item').click(function(e) {
-        if ($(e.target).is('button') || $(e.target).parent().is('button')) {
-            return;
-        }
-        
-        var notifId = $(this).data('notif-id');
-        var link = $(this).data('link');
-        
-        markAsRead(notifId);
-        
-        if (link) {
-            window.location.href = link;
-        }
-    });
-    
-    // Filter notifikasi
-    $('#notifTabs a').click(function(e) {
-        e.preventDefault();
-        $('#notifTabs a').removeClass('active');
-        $(this).addClass('active');
-        
-        var filter = $(this).data('filter');
-        filterNotifications(filter);
-    });
-    
-    // Mark all as read
-    $('#markAllRead').click(function() {
-        markAllAsRead();
-    });
-});
+    $(document).ready(function() {
+        // Klik pada notifikasi
+        $('.notif-item').click(function(e) {
+            if ($(e.target).is('button') || $(e.target).parent().is('button')) {
+                return;
+            }
 
-function filterNotifications(filter) {
-    $.ajax({
-        url: baseUrl + '/api/filter_notifications.php',
-        data: { filter: filter },
-        dataType: 'html',
-        success: function(data) {
-            $('#notif-container').html(data);
-        }
-    });
-}
+            var notifId = $(this).data('notif-id');
+            var link = $(this).data('link');
 
-function markAsRead(notifId, btn) {
-    $.ajax({
-        url: baseUrl + '/api/mark_notification_read.php',
-        method: 'POST',
-        data: { id: notifId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                var item = $('.notif-item[data-notif-id="' + notifId + '"]');
-                item.removeClass('unread');
-                if (btn) $(btn).remove();
-                
-                // Update badge di navbar
-                var currentCount = parseInt($('#notif-badge').text() || 0);
-                $('#notif-badge').text(Math.max(0, currentCount - 1));
-                if ($('#notif-badge').text() == '0') {
-                    $('#notif-badge').hide();
+            markAsRead(notifId);
+
+            if (link) {
+                window.location.href = link;
+            }
+        });
+
+        // Filter notifikasi
+        $('#notifTabs a').click(function(e) {
+            e.preventDefault();
+            $('#notifTabs a').removeClass('active');
+            $(this).addClass('active');
+
+            var filter = $(this).data('filter');
+            filterNotifications(filter);
+        });
+
+        // Mark all as read
+        $('#markAllRead').click(function() {
+            markAllAsRead();
+        });
+    });
+
+    function filterNotifications(filter) {
+        $.ajax({
+            url: baseUrl + '/api/filter_notifications.php',
+            data: {
+                filter: filter
+            },
+            dataType: 'html',
+            success: function(data) {
+                $('#notif-container').html(data);
+            }
+        });
+    }
+
+    function markAsRead(notifId, btn) {
+        $.ajax({
+            url: baseUrl + '/api/mark_notification_read.php',
+            method: 'POST',
+            data: {
+                id: notifId
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    var item = $('.notif-item[data-notif-id="' + notifId + '"]');
+                    item.removeClass('unread');
+                    if (btn) $(btn).remove();
+
+                    // Update badge di navbar
+                    var currentCount = parseInt($('#notif-badge').text() || 0);
+                    $('#notif-badge').text(Math.max(0, currentCount - 1));
+                    if ($('#notif-badge').text() == '0') {
+                        $('#notif-badge').hide();
+                    }
                 }
             }
-        }
-    });
-}
+        });
+    }
 
-function markAllAsRead() {
-    $.ajax({
-        url: baseUrl + '/api/mark_notification_read.php',
-        method: 'POST',
-        data: { all: 'true' },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                $('.notif-item').removeClass('unread');
-                $('.mark-read-btn').remove();
-                $('#markAllRead').remove();
-                $('#notif-badge').hide();
-                
-                // Update tab badge
-                $('a[data-filter="unread"] .badge').text('0');
+    function markAllAsRead() {
+        $.ajax({
+            url: baseUrl + '/api/mark_notification_read.php',
+            method: 'POST',
+            data: {
+                all: 'true'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $('.notif-item').removeClass('unread');
+                    $('.mark-read-btn').remove();
+                    $('#markAllRead').remove();
+                    $('#notif-badge').hide();
+
+                    // Update tab badge
+                    $('a[data-filter="unread"] .badge').text('0');
+                }
             }
-        }
-    });
-}
+        });
+    }
 </script>
 
-<?php 
+<?php
 $conn->close();
-include '../../includes/footer.php'; 
+include '../../includes/footer.php';
 ?>

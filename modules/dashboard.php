@@ -264,6 +264,9 @@ $(document).ready(function() {
     });
 });
 
+// ============================================
+// FUNGSI LOAD SUBTASKS
+// ============================================
 function loadSubtasks(taskId) {
     $.ajax({
         url: baseUrl + "/api/get_subtasks.php",
@@ -295,6 +298,9 @@ function loadSubtasks(taskId) {
     });
 }
 
+// ============================================
+// FUNGSI LOAD COMMENTS
+// ============================================
 function loadComments(subtaskId) {
     $.ajax({
         url: baseUrl + "/api/get_comments.php",
@@ -317,11 +323,48 @@ function loadComments(subtaskId) {
     });
 }
 
+// ============================================
+// FUNGSI LOAD REPLIES
+// ============================================
+function loadReplies(parentId) {
+    $.ajax({
+        url: baseUrl + "/api/get_replies.php",
+        data: { parent_id: parentId },
+        method: "GET",
+        dataType: "html",
+        timeout: 5000,
+        success: function(data) {
+            $("#replies-" + parentId).html(data);
+        },
+        error: function(xhr, status, error) {
+            console.error("Error load replies:", error);
+            $("#replies-" + parentId).html("");
+        }
+    });
+}
+
+// ============================================
+// FUNGSI SHOW/HIDE REPLY FORM
+// ============================================
+function showReplyForm(commentId) {
+    $("#reply-form-" + commentId).slideDown(200);
+}
+
+function hideReplyForm(commentId) {
+    $("#reply-form-" + commentId).slideUp(200);
+}
+
+// ============================================
+// FUNGSI SHOW ADD SUBTASK
+// ============================================
 function showAddSubtask(taskId) {
     $("#subtask_task_id").val(taskId);
     $("#modalSubtask").modal("show");
 }
 
+// ============================================
+// FUNGSI DELETE TASK
+// ============================================
 function deleteTask(taskId) {
     if(confirm("Yakin ingin menghapus judul tugas ini? Semua daftar tugas di dalamnya juga akan ikut terhapus!")) {
         $.ajax({
@@ -344,6 +387,9 @@ function deleteTask(taskId) {
     }
 }
 
+// ============================================
+// FUNGSI DELETE SUBTASK
+// ============================================
 function deleteSubtask(subtaskId) {
     if(confirm("Yakin ingin menghapus daftar tugas ini?")) {
         $.ajax({
@@ -366,6 +412,9 @@ function deleteSubtask(subtaskId) {
     }
 }
 
+// ============================================
+// FUNGSI SUBMIT KOMENTAR UTAMA
+// ============================================
 $(document).on("submit", ".add-comment-form", function(e) {
     e.preventDefault();
     
@@ -412,6 +461,58 @@ $(document).on("submit", ".add-comment-form", function(e) {
     });
 });
 
+// ============================================
+// FUNGSI SUBMIT BALASAN
+// ============================================
+$(document).on("submit", ".reply-form", function(e) {
+    e.preventDefault();
+    
+    var form = $(this);
+    var parentId = form.data("parent-id");
+    var subtaskId = form.data("subtask-id");
+    var komentar = form.find("input[name=\"komentar\"]").val();
+    
+    if (!komentar.trim()) {
+        alert("Balasan tidak boleh kosong");
+        return;
+    }
+    
+    var submitBtn = form.find("button[type=\"submit\"]");
+    submitBtn.prop("disabled", true).html("<span class=\"spinner-border spinner-border-sm\"></span>");
+    
+    $.ajax({
+        url: baseUrl + "/modules/comments/create.php",
+        method: "POST",
+        data: {
+            subtask_id: subtaskId,
+            komentar: komentar,
+            parent_id: parentId
+        },
+        dataType: "json",
+        timeout: 10000,
+        success: function(response) {
+            if (response.success) {
+                form.find("input[name=\"komentar\"]").val("");
+                hideReplyForm(parentId);
+                loadReplies(parentId);
+                showNotification("Balasan berhasil dikirim", "success");
+            } else {
+                alert("Gagal: " + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error submit balasan:", error);
+            alert("Terjadi kesalahan: " + error);
+        },
+        complete: function() {
+            submitBtn.prop("disabled", false).html("Kirim");
+        }
+    });
+});
+
+// ============================================
+// FUNGSI NOTIFIKASI
+// ============================================
 function showNotification(message, type) {
     var alertHtml = "<div class=\"alert alert-" + type + " alert-dismissible fade show alert-sm py-2\" role=\"alert\">" +
                     "<i class=\"bi bi-check-circle me-2\"></i>" + message +
@@ -424,6 +525,9 @@ function showNotification(message, type) {
     }, 3000);
 }
 
+// ============================================
+// FUNGSI APPLY FILTERS
+// ============================================
 function applyFilters() {
     var status = $("#filterStatus").val();
     var priority = $("#filterPriority").val();

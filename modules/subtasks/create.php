@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         logActivity($created_by, "Menambahkan subtask ID: $subtask_id ke task: $task_judul");
         
         // NOTIFIKASI 1: Untuk semua anggota (kecuali pembuat)
-        $notif_message = "✅ $username menambahkan tugas baru: \"$judul_sub\" di project \"$task_judul\"";
+        $notif_message = "$username menambahkan tugas baru: \"$judul_sub\" di project \"$task_judul\"";
         notifyAllMembers($notif_message, 'success', $created_by, base_url() . "/modules/dashboard.php#subtask-$subtask_id");
         
         // NOTIFIKASI 2: Jika ada deadline dan mepet, kasih warning khusus
