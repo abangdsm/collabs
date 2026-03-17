@@ -131,7 +131,7 @@ $(document).ready(function() {
 
 function loadSubtasks(taskId) {
     $.ajax({
-        url: '../api/get_subtasks.php',
+        url: baseUrl + '/api/get_subtasks.php',
         data: { task_id: taskId },
         success: function(data) {
             $('.subtask-list[data-task-id="' + taskId + '"]').html(data);
@@ -147,7 +147,7 @@ function showAddSubtask(taskId) {
 function deleteTask(taskId) {
     if(confirm('Yakin ingin menghapus judul tugas ini?')) {
         $.ajax({
-            url: '../api/delete_task.php',
+            url: baseUrl + '/api/delete_task.php',
             method: 'POST',
             data: { task_id: taskId },
             success: function(response) {
