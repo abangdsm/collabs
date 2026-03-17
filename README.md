@@ -21,7 +21,7 @@
 ## 📸 Screenshot
 
 <div align="center">
-  <img src="https://placehold.co/800x400/667eea/white?text=Collabs+Dashboard+Preview" alt="Dashboard Preview" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <img src="https://drive.google.com/file/d/1ThGoRRUIFh3U4opRJotfeUziz7OytArn/view?usp=sharing" alt="Dashboard Preview" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
 </div>
 
 ---
