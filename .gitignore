@@ -1,0 +1,19 @@
+# File konfigurasi lokal
+config/database.php
+.env
+*.log
+
+# Folder vendor/dependencies (kalau pakai composer)
+/vendor/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# File temporary
+*.tmp
+*.log
