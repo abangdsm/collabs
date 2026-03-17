@@ -320,6 +320,28 @@ function deleteTask(taskId) {
     }
 }
 
+function deleteSubtask(subtaskId) {
+    if(confirm('Yakin ingin menghapus daftar tugas ini?')) {
+        $.ajax({
+            url: baseUrl + '/api/delete_subtask.php',
+            method: 'POST',
+            data: { subtask_id: subtaskId },
+            dataType: 'json',
+            success: function(response) {
+                if(response.success) {
+                    alert('✅ Daftar tugas berhasil dihapus!');
+                    location.reload();
+                } else {
+                    alert('❌ Gagal: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('❌ Terjadi kesalahan: ' + error);
+            }
+        });
+    }
+}
+
 function applyFilters() {
     var status = $('#filterStatus').val();
     var priority = $('#filterPriority').val();
