@@ -56,16 +56,4 @@ while($notif = $result->fetch_assoc()):
 <?php 
 endwhile;
 $conn->close();
-
-function waktuLalu($datetime) {
-    $waktu = strtotime($datetime);
-    $sekarang = time();
-    $diff = $sekarang - $waktu;
-    
-    if ($diff < 60) return "baru saja";
-    if ($diff < 3600) return floor($diff/60) . " menit lalu";
-    if ($diff < 86400) return floor($diff/3600) . " jam lalu";
-    if ($diff < 259200) return floor($diff/86400) . " hari lalu";
-    return date('d/m/Y H:i', $waktu);
-}
 ?>

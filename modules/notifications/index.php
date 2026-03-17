@@ -5,8 +5,25 @@ requireLogin();
 $page_title = 'Semua Notifikasi';
 include '../../includes/header.php';
 
+// Definisikan fungsi waktuLalu di sini
+function waktuLalu($datetime) {
+    if (!$datetime) return '';
+    
+    $waktu = strtotime($datetime);
+    $sekarang = time();
+    $diff = $sekarang - $waktu;
+    
+    if ($diff < 60) return "baru saja";
+    if ($diff < 3600) return floor($diff/60) . " menit lalu";
+    if ($diff < 86400) return floor($diff/3600) . " jam lalu";
+    if ($diff < 259200) return floor($diff/86400) . " hari lalu";
+    return date('d/m/Y H:i', $waktu);
+}
+
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
+
+// ... sisanya tetap sama ...
 
 // Pagination
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
