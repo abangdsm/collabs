@@ -5,21 +5,6 @@ requireLogin();
 $page_title = 'Semua Notifikasi';
 include '../../includes/header.php';
 
-// Definisikan fungsi waktuLalu di sini
-function waktuLalu($datetime) {
-    if (!$datetime) return '';
-    
-    $waktu = strtotime($datetime);
-    $sekarang = time();
-    $diff = $sekarang - $waktu;
-    
-    if ($diff < 60) return "baru saja";
-    if ($diff < 3600) return floor($diff/60) . " menit lalu";
-    if ($diff < 86400) return floor($diff/3600) . " jam lalu";
-    if ($diff < 259200) return floor($diff/86400) . " hari lalu";
-    return date('d/m/Y H:i', $waktu);
-}
-
 $conn = getConnection();
 $user_id = $_SESSION['user_id'];
 
@@ -90,6 +75,37 @@ $unread_count = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE 
 
 .notif-item:hover .mark-read-btn {
     opacity: 1;
+}
+
+.notif-item {
+    transition: background-color 0.2s;
+    border-left: 3px solid transparent;
+    cursor: pointer; /* TAMBAHKAN INI */
+}
+
+.notif-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notif-item.unread {
+    background-color: #f0f7ff;
+    border-left-color: #0d6efd;
+}
+
+/* Tombol mark as read tetap pakai cursor default */
+.mark-read-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+    cursor: default; /* TAMBAHKAN INI */
+}
+
+.notif-item:hover .mark-read-btn {
+    opacity: 1;
+}
+
+/* Kecuali tombol, tetap pakai pointer */
+.mark-read-btn:hover {
+    cursor: pointer !important;
 }
 </style>
 
