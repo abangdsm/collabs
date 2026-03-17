@@ -12,7 +12,7 @@ $(document).ready(function() {
     }, 500);
     
     // Cek notifikasi setiap 10 detik
-    setInterval(checkNotifications, 10000);
+    setInterval(checkNotifications, 60000);
     
     // Event listener untuk klik pada notifikasi
     $(document).on('click', '.notif-item', function(e) {

@@ -41,7 +41,7 @@ $base_url = base_url();
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-grid me-2"></i>Dashboard</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTask">
+    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalTask">
         <i class="bi bi-plus-lg"></i> Buat Judul Tugas Baru
     </button>
 </div>
@@ -78,7 +78,7 @@ $base_url = base_url();
             <div class="col-md-4">
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Cari tugas..." id="searchInput">
-                    <button class="btn btn-primary" type="button" id="btnSearch">
+                    <button class="btn btn-dark" type="button" id="btnSearch">
                         <i class="bi bi-search"></i> Cari
                     </button>
                 </div>
@@ -131,7 +131,7 @@ $base_url = base_url();
                 </div>
                 
                 <!-- Tombol Tambah Daftar Tugas -->
-                <button class="btn btn-sm btn-outline-primary mt-3" onclick="showAddSubtask(<?php echo $task['id']; ?>)">
+                <button class="btn btn-sm btn-outline-dark mt-3" onclick="showAddSubtask(<?php echo $task['id']; ?>)">
                     <i class="bi bi-plus-circle me-1"></i> Tambah Daftar Tugas
                 </button>
             </div>
@@ -158,7 +158,7 @@ $base_url = base_url();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="submit" class="btn btn-dark">Simpan</button>
                 </div>
             </form>
         </div>
@@ -221,18 +221,17 @@ $base_url = base_url();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="submit" class="btn btn-dark">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- SCRIPT DIPINDAHKAN KE FOOTER.PHP -->
+<!-- SCRIPT DASHBOARD -->
 <?php 
 $conn->close();
 
-// Tambahkan script khusus untuk halaman ini
 $additional_scripts = '
 <script>
 // ============================================
@@ -284,6 +283,9 @@ function loadSubtasks(taskId) {
                     loadComments(subtaskId);
                 }
             });
+            
+            // INIT DRAG & DROP UNTUK TASK INI
+            initDragDrop(taskId);
         },
         error: function(xhr, status, error) {
             console.error("Error load subtasks:", error);
@@ -341,6 +343,57 @@ function loadReplies(parentId) {
             $("#replies-" + parentId).html("");
         }
     });
+}
+
+// ============================================
+// FUNGSI DRAG & DROP UNTUK SUBTASKS
+// ============================================
+function initDragDrop(taskId) {
+    var container = $(".subtask-list[data-task-id=\"" + taskId + "\"]");
+    
+    container.sortable({
+        items: ".subtask-item",
+        handle: ".drag-handle",
+        cursor: "grabbing",
+        opacity: 0.6,
+        placeholder: "sortable-placeholder",
+        tolerance: "pointer",
+        update: function(event, ui) {
+            // Ambil urutan baru
+            var subtaskIds = [];
+            $(this).find(".subtask-item").each(function() {
+                subtaskIds.push($(this).data("subtask-id"));
+            });
+            
+            console.log("Urutan baru:", subtaskIds);
+            
+            // Kirim ke server
+            $.ajax({
+                url: baseUrl + "/api/update_subtask_order.php",
+                method: "POST",
+                data: {
+                    task_id: taskId,
+                    order: JSON.stringify(subtaskIds)
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        console.log("Urutan berhasil disimpan");
+                        showNotification("Urutan subtasks berhasil diupdate", "success");
+                    } else {
+                        console.error("Gagal simpan urutan:", response.message);
+                        showNotification("Gagal menyimpan urutan", "danger");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    showNotification("Gagal menyimpan urutan", "danger");
+                }
+            });
+        }
+    });
+    
+    container.disableSelection();
 }
 
 // ============================================

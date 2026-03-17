@@ -98,3 +98,44 @@
     justify-content: center;
     font-weight: bold;
 }
+
+/* Drag & Drop styles */
+.subtask-item {
+    cursor: grab;
+    transition: all 0.2s;
+}
+
+.subtask-item:active {
+    cursor: grabbing;
+    opacity: 0.8;
+}
+
+.subtask-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Placeholder saat drag */
+.sortable-placeholder {
+    background-color: #e9ecef;
+    border: 2px dashed #0d6efd;
+    min-height: 50px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+/* Drag handle */
+.drag-handle {
+    cursor: grab;
+    color: #6c757d;
+    transition: color 0.2s;
+}
+
+.drag-handle:hover {
+    color: #0d6efd;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}

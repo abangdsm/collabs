@@ -72,11 +72,6 @@ try {
     ? "$username membalas komentar di tugas \"$subtask_judul\""
     : "$username berkomentar di tugas \"$subtask_judul\"";
     
-    // Notifikasi untuk pembuat task (jika bukan dirinya sendiri)
-    if ($task_owner != $user_id) {
-        notifyUser($task_owner, $notif_message, 'info', base_url() . "/modules/dashboard.php");
-    }
-    
     // Notifikasi untuk semua anggota (kecuali dirinya sendiri)
     notifyAllMembers($notif_message, 'info', $user_id, base_url() . "/modules/dashboard.php");
     

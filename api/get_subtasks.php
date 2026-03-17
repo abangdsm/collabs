@@ -2,14 +2,12 @@
 require_once '../includes/functions.php';
 requireLogin();
 
-header('Content-Type: text/html; charset=utf-8');
-
 $conn = getConnection();
 $task_id = (int)$_GET['task_id'];
 $user_id = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-// Debug (hapus nanti)
+// Debug - hapus nanti
 error_log("Loading subtasks for task_id: $task_id");
 
 $subtasks = $conn->query("
@@ -21,31 +19,31 @@ $subtasks = $conn->query("
 ");
 
 if (!$subtasks) {
-    echo "Error: " . $conn->error;
+    echo "Error database: " . $conn->error;
     $conn->close();
     exit();
 }
 
 if ($subtasks->num_rows == 0) {
-    echo '<p class="text-muted fst-italic small">Belum ada daftar tugas. Klik "Tambah Daftar Tugas" untuk membuat.</p>';
+    echo '<p class="text-muted fst-italic small">✨ Belum ada daftar tugas. Klik "Tambah Daftar Tugas" untuk membuat.</p>';
     $conn->close();
     exit();
 }
 
-while ($sub = $subtasks->fetch_assoc()) {
+while($sub = $subtasks->fetch_assoc()):
     // Tentukan class untuk deadline
     $deadline_class = '';
     $deadline_text = '';
-    if ($sub['deadline'] && $sub['deadline'] != '0000-00-00') {
+    if($sub['deadline'] && $sub['deadline'] != '0000-00-00') {
         $today = date('Y-m-d');
         $deadline = $sub['deadline'];
-        if ($deadline < $today) {
+        if($deadline < $today) {
             $deadline_class = 'text-danger fw-bold';
             $deadline_text = '🔴 ' . date('d/m/Y', strtotime($sub['deadline']));
-        } elseif ($deadline <= date('Y-m-d', strtotime('+1 day'))) {
+        } elseif($deadline <= date('Y-m-d', strtotime('+1 day'))) {
             $deadline_class = 'text-danger';
             $deadline_text = '⚠️ ' . date('d/m/Y', strtotime($sub['deadline']));
-        } elseif ($deadline <= date('Y-m-d', strtotime('+3 day'))) {
+        } elseif($deadline <= date('Y-m-d', strtotime('+3 day'))) {
             $deadline_class = 'text-warning';
             $deadline_text = '⚡ ' . date('d/m/Y', strtotime($sub['deadline']));
         } else {
@@ -53,41 +51,42 @@ while ($sub = $subtasks->fetch_assoc()) {
             $deadline_text = '📅 ' . date('d/m/Y', strtotime($sub['deadline']));
         }
     }
-
+    
     echo '<div class="card mb-2 subtask-item" data-subtask-id="' . $sub['id'] . '">';
     echo '<div class="card-body py-2">';
     echo '<div class="d-flex justify-content-between align-items-start">';
     echo '<div class="flex-grow-1">';
     echo '<div class="d-flex align-items-center">';
-    echo '<span class="me-2 text-muted" style="cursor: move;">☰</span>'; // Handle untuk drag
+    // DRAG HANDLE - INI PENTING UNTUK DRAG & DROP
+    echo '<span class="me-2 text-muted drag-handle" style="cursor: grab; font-size: 1.2rem;">☰</span>';
     echo '<h6 class="mb-1">' . htmlspecialchars($sub['judul_sub']) . '</h6>';
     echo '</div>';
-
+    
     // Tampilkan deskripsi jika ada
     if (!empty($sub['deskripsi'])) {
-        echo '<small class="text-muted d-block mb-1" style="margin-left: 24px;">' . nl2br(htmlspecialchars($sub['deskripsi'])) . '</small>';
+        echo '<small class="text-muted d-block mb-1" style="margin-left: 28px;">' . nl2br(htmlspecialchars($sub['deskripsi'])) . '</small>';
     }
-
-    echo '<div class="d-flex align-items-center gap-2 mt-1" style="margin-left: 24px;">';
-    echo '<small class="text-muted">' . $sub['creator'] . '</small>';
-
+    
+    echo '<div class="d-flex align-items-center gap-2 mt-1 flex-wrap" style="margin-left: 28px;">';
+    echo '<small class="text-muted">👤 ' . htmlspecialchars($sub['creator']) . '</small>';
+    
     // Badge priority
     $priority_class = $sub['priority'] == 'high' ? 'bg-danger' : ($sub['priority'] == 'medium' ? 'bg-warning text-dark' : 'bg-success');
     echo '<span class="badge ' . $priority_class . '">' . strtoupper($sub['priority']) . '</span>';
-
+    
     // Deadline
-    if (!empty($deadline_text)) {
+    if(!empty($deadline_text)) {
         echo '<small class="' . $deadline_class . '">' . $deadline_text . '</small>';
     }
-
+    
     // Status badge
     $status_class = $sub['status'] == 'proses' ? 'bg-warning text-dark' : ($sub['status'] == 'selesai' ? 'bg-success' : 'bg-danger');
     echo '<span class="badge ' . $status_class . '">' . strtoupper($sub['status']) . '</span>';
-
+    
     echo '</div>'; // tutup d-flex
-
+    
     echo '</div>'; // tutup flex-grow-1
-
+    
     // Tombol aksi
     echo '<div class="d-flex">';
     if ($role == 'admin' || $sub['created_by'] == $user_id) {
@@ -99,14 +98,11 @@ while ($sub = $subtasks->fetch_assoc()) {
         echo '</button>';
     }
     echo '</div>'; // tutup tombol aksi
-
+    
     echo '</div>'; // tutup d-flex utama
-    // Di dalam while loop, setelah tombol aksi
-    echo '</div>'; // tutup tombol aksi
-    echo '</div>'; // tutup d-flex utama
-
-    // TAMBAHKAN BAGIAN KOMENTAR DI SINI
-    echo '<div class="mt-2 ps-4 border-start border-2" style="margin-left: 24px;">';
+    
+    // KOMENTAR SECTION
+    echo '<div class="mt-2 ps-4 border-start border-2" style="margin-left: 28px;">';
     echo '<div class="comments-container" data-subtask-id="' . $sub['id'] . '">';
     echo '<div class="comments-list mb-2" id="comments-' . $sub['id'] . '">';
     echo '<div class="text-muted small">Memuat komentar...</div>';
@@ -122,11 +118,10 @@ while ($sub = $subtasks->fetch_assoc()) {
     echo '</form>';
     echo '</div>'; // tutup comments-container
     echo '</div>'; // tutup border-start
-
+    
     echo '</div>'; // tutup card-body
     echo '</div>'; // tutup card
-    echo '</div>'; // tutup card-body
-    echo '</div>'; // tutup card
-}
+endwhile;
 
 $conn->close();
+?>

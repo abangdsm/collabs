@@ -2,9 +2,6 @@
 require_once '../../includes/functions.php';
 requireLogin();
 
-$page_title = 'Edit Daftar Tugas';
-include '../../includes/header.php';
-
 $conn = getConnection();
 $subtask_id = (int)$_GET['id'];
 
@@ -17,14 +14,14 @@ $result = $conn->query("
 ");
 $subtask = $result->fetch_assoc();
 
-// Cek apakah user berhak edit (admin atau pembuat)
+// CEK AKSES SEBELUM INCLUDE HEADER!
 if (!$subtask || ($_SESSION['role'] != 'admin' && $subtask['created_by'] != $_SESSION['user_id'])) {
     $_SESSION['error'] = "Anda tidak berhak mengedit tugas ini!";
     header('Location: ' . base_url() . '/modules/dashboard.php');
     exit();
 }
 
-// Proses update
+// Proses update - CEK APAKAH ADA POST DATA
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $judul_sub = $conn->real_escape_string($_POST['judul_sub']);
     $deskripsi = $conn->real_escape_string($_POST['deskripsi'] ?? '');
@@ -51,6 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 $conn->close();
+
+// SEKARANG BARU INCLUDE HEADER (SETELAH SEMUA LOGIC)
+$page_title = 'Edit Daftar Tugas';
+include '../../includes/header.php';
 ?>
 
 <div class="row justify-content-center">
@@ -89,7 +90,7 @@ $conn->close();
                         <div class="col-md-4 mb-3">
                             <label for="deadline" class="form-label">Deadline</label>
                             <input type="date" class="form-control" id="deadline" name="deadline" 
-                                   value="<?php echo $subtask['deadline']; ?>">
+                                value="<?php echo $subtask['deadline']; ?>">
                         </div>
                         
                         <div class="col-md-4 mb-3">

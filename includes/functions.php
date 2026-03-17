@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
-// Mulai session hanya jika belum dimulai
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

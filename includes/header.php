@@ -1,12 +1,8 @@
 <?php
-// Hapus session_start() dari sini karena sudah di functions.php
-require_once 'functions.php';  // functions.php sudah ada session_start()
-
-// Cek apakah user login untuk menentukan tampilan navbar
+require_once 'functions.php';
 $isLoggedIn = isLoggedIn();
-$base_url = base_url(); // Simpan base_url ke variabel
-?>
-<!DOCTYPE html>
+$base_url = base_url(); 
+?><!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -20,8 +16,8 @@ $base_url = base_url(); // Simpan base_url ke variabel
 
 <body>
     <?php if ($isLoggedIn): ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
                 <a class="navbar-brand" href="<?php echo $base_url; ?>/modules/dashboard.php">
                     <i class="bi bi-check2-square me-1"></i> Collabs
                 </a>
@@ -42,11 +38,12 @@ $base_url = base_url(); // Simpan base_url ke variabel
                         </li>
                     </ul>
                     <ul class="navbar-nav">
-                        <!-- Notifikasi Dropdown -->
+                        <!-- Notifikasi Dropdown - BADGE LEBIH DEKAT -->
                         <li class="nav-item dropdown mx-1">
                             <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell fs-5"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notif-badge" style="display: none;">
+                                <span class="position-absolute badge rounded-pill bg-danger" id="notif-badge" 
+                                      style="display: none; font-size: 0.6rem; top: 2px; right: 2px; padding: 0.2rem 0.4rem;">
                                     0
                                 </span>
                             </a>
