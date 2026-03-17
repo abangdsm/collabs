@@ -12,8 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $deadline = !empty($_POST['deadline']) ? "'" . $conn->real_escape_string($_POST['deadline']) . "'" : "NULL";
     $status = $conn->real_escape_string($_POST['status'] ?? 'proses');
     $created_by = $_SESSION['user_id'];
+    $username = $_SESSION['username'];
     
-    // Cek urutan terakhir untuk task ini
+    // Ambil judul task untuk keperluan notifikasi
+    $task_result = $conn->query("SELECT judul FROM tasks WHERE id = $task_id");
+    $task_data = $task_result->fetch_assoc();
+    $task_judul = $task_data['judul'];
+    
+    // Cek urutan terakhir
     $result = $conn->query("SELECT MAX(urutan) as max_urutan FROM subtasks WHERE task_id = $task_id");
     $row = $result->fetch_assoc();
     $urutan = ($row['max_urutan'] ?? 0) + 1;
@@ -25,12 +31,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $subtask_id = $conn->insert_id;
         
         // Catat activity log
-        logActivity($created_by, "Menambahkan subtask ID: $subtask_id ke task ID: $task_id");
+        logActivity($created_by, "Menambahkan subtask ID: $subtask_id ke task: $task_judul");
         
-        // Buat notifikasi untuk anggota tim (kecuali dirinya sendiri)
-        $notif_message = "$_SESSION[username] menambahkan tugas: $judul_sub";
-        $conn->query("INSERT INTO notifications (user_id, message, type) 
-                     SELECT id, '$notif_message', 'info' FROM users WHERE id != $created_by");
+        // NOTIFIKASI 1: Untuk semua anggota (kecuali pembuat)
+        $notif_message = "✅ $username menambahkan tugas baru: \"$judul_sub\" di project \"$task_judul\"";
+        notifyAllMembers($notif_message, 'success', $created_by, base_url() . "/modules/dashboard.php#subtask-$subtask_id");
+        
+        // NOTIFIKASI 2: Jika ada deadline dan mepet, kasih warning khusus
+        if (!empty($_POST['deadline'])) {
+            $deadline_date = $_POST['deadline'];
+            $today = date('Y-m-d');
+            $diff = (strtotime($deadline_date) - strtotime($today)) / 86400; // selisih hari
+            
+            if ($diff <= 2) {
+                $warning_message = "⚠️ Deadline tugas \"$judul_sub\" tinggal $diff hari lagi!";
+                notifyAllMembers($warning_message, 'warning', $created_by, base_url() . "/modules/dashboard.php#subtask-$subtask_id");
+            }
+        }
         
         $_SESSION['success'] = "Daftar tugas berhasil ditambahkan!";
     } else {

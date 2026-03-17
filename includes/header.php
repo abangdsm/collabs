@@ -8,6 +8,7 @@ $base_url = base_url(); // Simpan base_url ke variabel
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,53 +17,57 @@ $base_url = base_url(); // Simpan base_url ke variabel
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="<?php echo $base_url; ?>/assets/css/style.css">
 </head>
+
 <body>
     <?php if ($isLoggedIn): ?>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="<?php echo $base_url; ?>/modules/dashboard.php">Collabs</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $base_url; ?>/modules/dashboard.php">
-                            <i class="bi bi-house-door"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo $base_url; ?>/modules/archive.php">
-                            <i class="bi bi-archive"></i> Arsip
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-bell"></i>
-                            <span class="badge bg-danger rounded-pill" id="notif-badge">0</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" id="notif-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                            <li><h6 class="dropdown-header">Notifikasi</h6></li>
-                            <li><div id="notif-content">Loading...</div></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> <?php echo $_SESSION['username'] ?? 'User'; ?>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="<?php echo $base_url; ?>/modules/auth/logout.php">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </a></li>
-                        </ul>
-                    </li>
-                </ul>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="<?php echo $base_url; ?>/modules/dashboard.php">Collabs</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo $base_url; ?>/modules/dashboard.php">
+                                <i class="bi bi-house-door"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo $base_url; ?>/modules/archive.php">
+                                <i class="bi bi-archive"></i> Arsip
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notif-badge" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" id="notif-list" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                                <li><span class="dropdown-item-text text-muted text-center">Memuat notifikasi...</span></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> <?php echo $_SESSION['username'] ?? 'User'; ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profil</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="<?php echo $base_url; ?>/modules/auth/logout.php">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
     <?php endif; ?>
     <div class="container mt-4">

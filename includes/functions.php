@@ -41,10 +41,43 @@ function logActivity($user_id, $action) {
 }
 
 // Buat notifikasi
-function createNotification($user_id, $message, $type = 'info') {
+/**
+ * Buat notifikasi untuk semua anggota tim kecuali pembuat
+ * @param string $message Pesan notifikasi
+ * @param string $type Tipe notifikasi (info, success, warning, danger)
+ * @param int $exclude_user_id User yang TIDAK perlu dapat notifikasi (biasanya pembuat)
+ * @param string $link URL link (opsional)
+ */
+function notifyAllMembers($message, $type = 'info', $exclude_user_id = null, $link = '') {
     $conn = getConnection();
-    $stmt = $conn->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, ?, ?)");
-    $stmt->bind_param("iss", $user_id, $message, $type);
+    
+    $message = $conn->real_escape_string($message);
+    $type = $conn->real_escape_string($type);
+    $link = $conn->real_escape_string($link);
+    
+    $sql = "INSERT INTO notifications (user_id, message, type, link) 
+            SELECT id, '$message', '$type', '$link' FROM users";
+    
+    if ($exclude_user_id) {
+        $sql .= " WHERE id != $exclude_user_id";
+    }
+    
+    $conn->query($sql);
+    $conn->close();
+}
+
+/**
+ * Buat notifikasi untuk user tertentu
+ */
+function notifyUser($user_id, $message, $type = 'info', $link = '') {
+    $conn = getConnection();
+    
+    $message = $conn->real_escape_string($message);
+    $type = $conn->real_escape_string($type);
+    $link = $conn->real_escape_string($link);
+    
+    $stmt = $conn->prepare("INSERT INTO notifications (user_id, message, type, link) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("isss", $user_id, $message, $type, $link);
     $stmt->execute();
     $stmt->close();
     $conn->close();
