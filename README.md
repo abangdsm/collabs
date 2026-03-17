@@ -21,7 +21,7 @@
 ## 📸 Screenshot
 
 <div align="center">
-  <img src="https:tools.conexo.id/collabs.png" alt="Dashboard Preview" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <img src="assets/images/collabs.png" alt="Dashboard Preview" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
 </div>
 
 ---

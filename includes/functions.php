@@ -3,20 +3,6 @@ date_default_timezone_set('Asia/Jakarta');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-
-    // Di awal file, setelah session_start()
-    if ($_SERVER['HTTP_HOST'] == 'localhost') {
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-    } else {
-        error_reporting(0);
-        ini_set('display_errors', 0);
-        ini_set('log_errors', 1);
-        ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
-    }
-
-    // Buat folder logs di root
-    // logs/php_errors.log (pastikan writable)
 }
 
 
@@ -123,21 +109,17 @@ function checkDeadlines()
     $conn->close();
 }
 
+// Base URL function - VERSI SEDERHANA
 function base_url()
 {
+    // Deteksi protocol (http atau https)
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+
+    // Dapatkan host (localhost atau domain)
     $host = $_SERVER['HTTP_HOST'];
 
-    // Deteksi folder (kalau di subfolder)
-    $script_name = $_SERVER['SCRIPT_NAME'];
-    $folder = str_replace('\\', '/', dirname($script_name));
-
-    // Kalau di root, folder akan jadi '/'
-    if ($folder == '/' || $folder == '\\') {
-        return $protocol . $host;
-    }
-
-    return $protocol . $host . $folder;
+    // Untuk Laragon, folder project ada di /collabs/
+    return $protocol . $host . '/collabs';
 }
 
 /**
