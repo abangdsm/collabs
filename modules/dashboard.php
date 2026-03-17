@@ -246,13 +246,31 @@ $(document).ready(function() {
         loadSubtasks(taskId);
     });
     
-    // Event listener untuk filter dan search
-    $("#filterStatus, #filterPriority, #filterDeadline, #btnSearch").on("change click", function() {
+    // FILTER REALTIME
+    var searchTimeout;
+    
+    // Filter saat mengetik di search (dengan delay)
+    $("#searchInput").on("keyup", function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            applyFilters();
+        }, 500); // Delay 500ms biar gak terlalu banyak request
+    });
+    
+    // Filter saat dropdown berubah
+    $("#filterStatus, #filterPriority, #filterDeadline").on("change", function() {
         applyFilters();
     });
     
+    // Filter saat tombol search diklik
+    $("#btnSearch").on("click", function() {
+        applyFilters();
+    });
+    
+    // Filter saat enter di search
     $("#searchInput").on("keypress", function(e) {
         if (e.which == 13) {
+            e.preventDefault();
             applyFilters();
         }
     });
@@ -567,8 +585,30 @@ $(document).on("submit", ".reply-form", function(e) {
 // FUNGSI NOTIFIKASI
 // ============================================
 function showNotification(message, type) {
-    var alertHtml = "<div class=\"alert alert-" + type + " alert-dismissible fade show alert-sm py-2\" role=\"alert\">" +
-                    "<i class=\"bi bi-check-circle me-2\"></i>" + message +
+    // Tentukan class dan icon berdasarkan type
+    var bgClass = "";
+    var icon = "";
+    
+    switch(type) {
+        case "success":
+            bgClass = "alert-success";
+            icon = "bi-check-circle";
+            break;
+        case "danger":
+            bgClass = "alert-danger";
+            icon = "bi-exclamation-triangle";
+            break;
+        case "warning":
+            bgClass = "alert-warning";
+            icon = "bi-exclamation-circle";
+            break;
+        default:
+            bgClass = "alert-info";
+            icon = "bi-info-circle";
+    }
+    
+    var alertHtml = "<div class=\"alert " + bgClass + " alert-dismissible fade show alert-sm py-2\" role=\"alert\">" +
+                    "<i class=\"bi " + icon + " me-2\"></i>" + message +
                     "<button type=\"button\" class=\"btn-close btn-sm\" data-bs-dismiss=\"alert\"></button>" +
                     "</div>";
     $("#tasks-container").before(alertHtml);
@@ -579,7 +619,7 @@ function showNotification(message, type) {
 }
 
 // ============================================
-// FUNGSI APPLY FILTERS
+// FUNGSI APPLY FILTERS - REALTIME
 // ============================================
 function applyFilters() {
     var status = $("#filterStatus").val();
@@ -588,7 +628,52 @@ function applyFilters() {
     var search = $("#searchInput").val();
     
     console.log("Filter:", {status, priority, deadline, search});
-    showNotification("Fitur filter akan segera hadir!", "info");
+    
+    // Tampilkan loading
+    $("#tasks-container").html(
+        "<div class=\"text-center py-5\">" +
+        "<div class=\"spinner-border text-primary\" role=\"status\"></div>" +
+        "<p class=\"mt-2 text-muted\">Memfilter tugas...</p>" +
+        "</div>"
+    );
+    
+    $.ajax({
+        url: baseUrl + "/api/filter_tasks.php",
+        data: {
+            status: status,
+            priority: priority,
+            deadline: deadline,
+            search: search
+        },
+        dataType: "json",
+        timeout: 10000,
+        success: function(response) {
+            console.log("Filter response:", response);
+            
+            // Update tasks container dengan HTML baru
+            $("#tasks-container").html(response.tasks_html);
+            
+            // Load subtasks untuk setiap task yang baru
+            $(".subtask-list").each(function() {
+                var taskId = $(this).data("task-id");
+                loadSubtasks(taskId);
+            });
+            
+            // Tampilkan notifikasi hasil filter
+            if (response.subtasks_count > 0) {
+                showNotification("Ditemukan " + response.subtasks_count + " tugas yang sesuai", "info");
+            } else {
+                showNotification("Tidak ada tugas yang sesuai dengan filter", "warning");
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error filter:", error);
+            showNotification("Gagal memfilter tugas", "danger");
+            
+            // Reload halaman sebagai fallback
+            location.reload();
+        }
+    });
 }
 </script>
 ';
