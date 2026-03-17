@@ -26,10 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
             
-            // Update last login
             $conn->query("UPDATE users SET last_login = NOW() WHERE id = " . $user['id']);
-            
-            // Catat activity log
             logActivity($user['id'], 'Login');
             
             header('Location: ' . base_url() . '/modules/dashboard.php');
@@ -43,38 +40,85 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->close();
 }
 
-$base_url = base_url(); // Untuk digunakan di form action jika perlu
+$base_url = base_url();
 ?>
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Login Collabs</h4>
-            </div>
-            <div class="card-body">
-                <?php if (isset($_SESSION['success'])): ?>
-                    <div class="alert alert-success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
-                <?php endif; ?>
-                
-                <?php if ($error): ?>
-                    <div class="alert alert-danger"><?php echo $error; ?></div>
-                <?php endif; ?>
-                
-                <form method="POST" action="">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username atau Email</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    .content-wrapper {
+        flex: 1 0 auto;
+        display: flex;
+        align-items: center;
+        padding: 20px 0;
+    }
+    
+    .footer {
+        flex-shrink: 0;
+        width: 100%;
+    }
+</style>
+
+<div class="content-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-dark text-white text-center py-4">
+                        <h3 class="mb-0"><i class="bi bi-check2-square me-2"></i>Collabs</h3>
+                        <p class="small mb-0 mt-2">Team Collaborator Platform</p>
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="card-body p-4">
+                        <?php if (isset($_SESSION['success'])): ?>
+                            <div class="alert alert-success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
+                        <?php endif; ?>
+                        
+                        <?php if ($error): ?>
+                            <div class="alert alert-danger"><?php echo $error; ?></div>
+                        <?php endif; ?>
+                        
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="bi bi-person me-1"></i>Username atau Email
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       placeholder="Masukkan username atau email" required autofocus>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="bi bi-lock me-1"></i>Password
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Masukkan password" required>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-dark btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p class="mb-0">
+                                Belum punya akun? 
+                                <a href="register.php" class="text-primary fw-bold">
+                                    Register di sini
+                                </a>
+                            </p>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                
-                <div class="mt-3 text-center">
-                    Belum punya akun? <a href="register.php">Register di sini</a>
                 </div>
             </div>
         </div>

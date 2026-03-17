@@ -12,7 +12,7 @@ if (isLoggedIn()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collabs - Team Collaborator Platform</title>
+    <title>Collabs - Team Collaboration Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -21,7 +21,7 @@ if (isLoggedIn()) {
         <div class="row justify-content-center">
             <div class="col-md-8 text-center">
                 <h1 class="display-4 mb-4">Collabs</h1>
-                <p class="lead">Team Collaborator Platform</p>
+                <p class="lead">Team Collaboration Platform</p>
                 <hr class="my-4">
                 <p>Kelola tugas, pantau progress, dan berkolaborasi dengan tim secara efektif.</p>
                 <div class="mt-4">
