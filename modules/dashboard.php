@@ -44,7 +44,7 @@ $base_url = base_url();
     </button>
 </div>
 
-<!-- FILTER SECTION - LENGKAP -->
+<!-- FILTER SECTION -->
 <div class="card mb-4">
     <div class="card-body">
         <div class="row g-2">
@@ -99,14 +99,12 @@ $base_url = base_url();
                 <div>
                     <small class="text-muted me-3">Dibuat oleh: <?php echo $task['creator']; ?></small>
                     
-                    <!-- Tampilkan tombol Edit untuk admin ATAU pembuat tugas -->
                     <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
                         <a href="tasks/edit.php?id=<?php echo $task['id']; ?>" class="btn btn-sm btn-outline-primary me-1">
                             <i class="bi bi-pencil"></i>
                         </a>
                     <?php endif; ?>
                     
-                    <!-- Tombol Delete hanya untuk admin ATAU pembuat tugas -->
                     <?php if ($_SESSION['role'] == 'admin' || $task['created_by'] == $user_id): ?>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(<?php echo $task['id']; ?>)">
                             <i class="bi bi-trash"></i>
@@ -115,7 +113,6 @@ $base_url = base_url();
                 </div>
             </div>
             <div class="card-body">
-                <!-- Subtasks akan diload via AJAX -->
                 <div class="subtask-list" data-task-id="<?php echo $task['id']; ?>">
                     <p class="text-muted">Loading subtasks...</p>
                 </div>
@@ -173,7 +170,6 @@ $base_url = base_url();
                     <div class="mb-3">
                         <label for="subtask_deskripsi" class="form-label">Deskripsi & Skill yang Dibutuhkan</label>
                         <textarea class="form-control" id="subtask_deskripsi" name="deskripsi" rows="3"></textarea>
-                        <small class="text-muted">Jelaskan detail tugas dan skill yang diperlukan</small>
                     </div>
                     
                     <div class="row">
@@ -205,7 +201,6 @@ $base_url = base_url();
                         <label for="subtask_link" class="form-label">Link Eksternal (Opsional)</label>
                         <input type="url" class="form-control" id="subtask_link" name="link" 
                                placeholder="https://drive.google.com/...">
-                        <small class="text-muted">Link ke Google Drive atau dokumen eksternal</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -217,73 +212,94 @@ $base_url = base_url();
     </div>
 </div>
 
+<!-- INI ADALAH SATU-SATUNYA SCRIPT DI HALAMAN INI -->
 <script>
-// PASTIKAN SEMUA KODE JQUERY BERADA DI DALAM .ready()
-$(document).ready(function() {
-    console.log('Dashboard ready, jQuery version:', $.fn.jquery);
+// ============================================
+// TUNGGU SAMPAI SELURUH HALAMAN SIAP
+// ============================================
+window.onload = function() {
+    console.log('Window loaded - memastikan semua resource siap');
     
-    // Load subtasks for each task
-    $('.subtask-list').each(function() {
-        var taskId = $(this).data('task-id');
+    // Cek apakah jQuery sudah tersedia
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery tidak ditemukan!');
+        alert('Error: jQuery tidak ditemukan. Refresh halaman.');
+        return;
+    }
+    
+    console.log('jQuery version:', jQuery.fn.jquery);
+    console.log('Base URL:', baseUrl);
+    
+    // Load subtasks untuk setiap task
+    jQuery('.subtask-list').each(function() {
+        var taskId = jQuery(this).data('task-id');
+        console.log('Loading subtasks for task:', taskId);
         loadSubtasks(taskId);
     });
     
     // Event listener untuk filter dan search
-    $('#filterStatus, #filterPriority, #filterDeadline, #btnSearch').on('change click', function() {
+    jQuery('#filterStatus, #filterPriority, #filterDeadline, #btnSearch').on('change click', function() {
         applyFilters();
     });
     
-    // Search juga bisa dengan tekan Enter
-    $('#searchInput').on('keypress', function(e) {
+    jQuery('#searchInput').on('keypress', function(e) {
         if (e.which == 13) {
             applyFilters();
         }
     });
     
-    // Reset form modal ketika ditutup
-    $('#modalSubtask').on('hidden.bs.modal', function () {
-        $('#formSubtask')[0].reset();
+    jQuery('#modalSubtask').on('hidden.bs.modal', function () {
+        jQuery('#formSubtask')[0].reset();
     });
-});
+};
 
-// FUNGSI-FUNGSI DILUAR .ready() TAPI TETAP AMAN KARENA DIPANGGIL DARI DALAM .ready()
+// ============================================
+// FUNGSI-FUNGSI
+// ============================================
 function loadSubtasks(taskId) {
-    if (typeof $ === 'undefined') {
-        console.error('jQuery not loaded!');
-        return;
-    }
+    console.log('AJAX call to load subtasks for task:', taskId);
     
-    $.ajax({
+    jQuery.ajax({
         url: baseUrl + '/api/get_subtasks.php',
         data: { task_id: taskId },
+        method: 'GET',
+        dataType: 'html',
+        timeout: 10000,
+        beforeSend: function() {
+            jQuery('.subtask-list[data-task-id="' + taskId + '"]').html('<p class="text-muted small">⏳ Memuat subtasks...</p>');
+        },
         success: function(data) {
-            $('.subtask-list[data-task-id="' + taskId + '"]').html(data);
+            console.log('Subtasks loaded for task', taskId);
+            jQuery('.subtask-list[data-task-id="' + taskId + '"]').html(data);
         },
         error: function(xhr, status, error) {
-            console.error('Error load subtasks:', error);
+            console.error('Error load subtasks for task', taskId, ':', error);
+            console.error('Response:', xhr.responseText);
+            
+            jQuery('.subtask-list[data-task-id="' + taskId + '"]').html(
+                '<p class="text-danger small">❌ Gagal memuat subtasks. Error: ' + error + '</p>' +
+                '<button class="btn btn-sm btn-outline-secondary mt-1" onclick="loadSubtasks(' + taskId + ')">🔄 Coba Lagi</button>'
+            );
         }
     });
 }
 
 function showAddSubtask(taskId) {
-    $('#subtask_task_id').val(taskId);
-    $('#modalSubtask').modal('show');
+    console.log('Show add subtask modal for task:', taskId);
+    jQuery('#subtask_task_id').val(taskId);
+    jQuery('#modalSubtask').modal('show');
 }
 
 function deleteTask(taskId) {
-    if(confirm('Yakin ingin menghapus judul tugas ini? Semua daftar tugas di dalamnya juga akan ikut terhapus!')) {
-        console.log('Mencoba hapus task ID:', taskId);
-        console.log('Base URL:', baseUrl);
-        console.log('Full URL:', baseUrl + '/api/delete_task.php');
+    if(confirm('Yakin ingin menghapus judul tugas ini?')) {
+        console.log('Deleting task:', taskId);
         
-        $.ajax({
+        jQuery.ajax({
             url: baseUrl + '/api/delete_task.php',
             method: 'POST',
             data: { task_id: taskId },
             dataType: 'json',
-            timeout: 10000,
             success: function(response) {
-                console.log('Response success:', response);
                 if(response.success) {
                     alert('✅ Tugas berhasil dihapus!');
                     location.reload();
@@ -292,29 +308,7 @@ function deleteTask(taskId) {
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error detail:', {
-                    status: status,
-                    error: error,
-                    responseText: xhr.responseText,
-                    statusCode: xhr.status
-                });
-                
-                let errorMsg = '❌ Terjadi kesalahan: ';
-                if (xhr.status === 405) {
-                    errorMsg += 'Method tidak diizinkan';
-                } else if (xhr.status === 404) {
-                    errorMsg += 'File API tidak ditemukan';
-                } else if (xhr.status === 500) {
-                    try {
-                        var resp = JSON.parse(xhr.responseText);
-                        errorMsg += resp.message || 'Internal server error';
-                    } catch(e) {
-                        errorMsg += 'Internal server error';
-                    }
-                } else {
-                    errorMsg += error || 'Unknown error';
-                }
-                alert(errorMsg);
+                alert('❌ Terjadi kesalahan: ' + error);
             }
         });
     }
@@ -322,7 +316,9 @@ function deleteTask(taskId) {
 
 function deleteSubtask(subtaskId) {
     if(confirm('Yakin ingin menghapus daftar tugas ini?')) {
-        $.ajax({
+        console.log('Deleting subtask:', subtaskId);
+        
+        jQuery.ajax({
             url: baseUrl + '/api/delete_subtask.php',
             method: 'POST',
             data: { subtask_id: subtaskId },
@@ -343,14 +339,12 @@ function deleteSubtask(subtaskId) {
 }
 
 function applyFilters() {
-    var status = $('#filterStatus').val();
-    var priority = $('#filterPriority').val();
-    var deadline = $('#filterDeadline').val();
-    var search = $('#searchInput').val();
+    var status = jQuery('#filterStatus').val();
+    var priority = jQuery('#filterPriority').val();
+    var deadline = jQuery('#filterDeadline').val();
+    var search = jQuery('#searchInput').val();
     
-    console.log('Filter:', {status, priority, deadline, search});
-    
-    // Nanti akan diimplementasi
+    console.log('Filter applied:', {status, priority, deadline, search});
     alert('Fitur filter akan segera hadir!');
 }
 </script>
