@@ -1,8 +1,9 @@
 <?php
 require_once 'functions.php';
 $isLoggedIn = isLoggedIn();
-$base_url = base_url(); 
-?><!DOCTYPE html>
+$base_url = base_url();
+?>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -42,8 +43,8 @@ $base_url = base_url();
                         <li class="nav-item dropdown mx-1">
                             <a class="nav-link dropdown-toggle position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell fs-5"></i>
-                                <span class="position-absolute badge rounded-pill bg-danger" id="notif-badge" 
-                                      style="display: none; font-size: 0.6rem; top: 2px; right: 2px; padding: 0.2rem 0.4rem;">
+                                <span class="position-absolute badge rounded-pill bg-danger" id="notif-badge"
+                                    style="display: none; font-size: 0.6rem; top: 2px; right: 2px; padding: 0.2rem 0.4rem;">
                                     0
                                 </span>
                             </a>
@@ -66,34 +67,37 @@ $base_url = base_url();
                                 </li>
                             </ul>
                         </li>
-                        
+
                         <!-- User Dropdown -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle me-1"></i> 
+                                <i class="bi bi-person-circle me-1"></i>
                                 <span class="d-none d-lg-inline"><?php echo $_SESSION['username'] ?? 'User'; ?></span>
+                                <?php if ($_SESSION['role'] == 'admin'): ?>
+                                    <span class="badge bg-danger ms-1">Admin</span>
+                                <?php endif; ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <?php if ($_SESSION['role'] == 'admin'): ?>
+                                    <li>
+                                        <a class="dropdown-item" href="<?php echo $base_url; ?>/modules/users/index.php">
+                                            <i class="bi bi-people me-2"></i> Manajemen User
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                <?php endif; ?>
                                 <li>
                                     <a class="dropdown-item" href="<?php echo $base_url; ?>/modules/notifications/index.php">
                                         <i class="bi bi-bell me-2"></i> Semua Notifikasi
-                                        <?php 
-                                        // Hitung notifikasi belum dibaca untuk badge di menu
-                                        if ($isLoggedIn) {
-                                            $conn = getConnection();
-                                            $user_id = $_SESSION['user_id'];
-                                            $unread = $conn->query("SELECT COUNT(*) as total FROM notifications WHERE user_id = $user_id AND is_read = 0")->fetch_assoc()['total'];
-                                            if ($unread > 0) {
-                                                echo '<span class="badge bg-primary ms-2">' . $unread . '</span>';
-                                            }
-                                            $conn->close();
-                                        }
-                                        ?>
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i> Profil</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i> Pengaturan</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item text-danger" href="<?php echo $base_url; ?>/modules/auth/logout.php">
                                         <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -106,22 +110,24 @@ $base_url = base_url();
             </div>
         </nav>
     <?php endif; ?>
-    
+
     <!-- Main Content Container -->
     <div class="container mt-4">
         <!-- Pesan flash akan muncul di sini -->
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle me-2"></i>
-                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                <?php echo $_SESSION['success'];
+                unset($_SESSION['success']); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
-        
+
         <?php if (isset($_SESSION['error'])): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="bi bi-exclamation-triangle me-2"></i>
-                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                <?php echo $_SESSION['error'];
+                unset($_SESSION['error']); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>

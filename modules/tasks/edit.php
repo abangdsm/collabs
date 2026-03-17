@@ -2,9 +2,6 @@
 require_once '../../includes/functions.php';
 requireLogin();
 
-$page_title = 'Edit Judul Tugas';
-include '../../includes/header.php';
-
 $conn = getConnection();
 $task_id = (int)$_GET['id'];
 
@@ -12,12 +9,22 @@ $task_id = (int)$_GET['id'];
 $result = $conn->query("SELECT * FROM tasks WHERE id = $task_id");
 $task = $result->fetch_assoc();
 
-// Cek apakah user berhak edit (hanya admin atau pembuat)
+// CEK AKSES - Admin boleh, member hanya boleh edit tugas sendiri
+if (!$task) {
+    $_SESSION['error'] = "Tugas tidak ditemukan!";
+    header('Location: ' . base_url() . '/modules/dashboard.php');
+    exit();
+}
+
+// Kalau bukan admin dan bukan pembuat tugas, TOLAK!
 if ($_SESSION['role'] != 'admin' && $task['created_by'] != $_SESSION['user_id']) {
     $_SESSION['error'] = "Anda tidak berhak mengedit tugas ini!";
     header('Location: ' . base_url() . '/modules/dashboard.php');
     exit();
 }
+
+$page_title = 'Edit Judul Tugas';
+include '../../includes/header.php';
 
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -33,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "Gagal mengupdate: " . $conn->error;
     }
 }
-
 $conn->close();
 ?>
 

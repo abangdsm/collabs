@@ -254,7 +254,7 @@ $(document).ready(function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(function() {
             applyFilters();
-        }, 500); // Delay 500ms biar gak terlalu banyak request
+        }, 500);
     });
     
     // Filter saat dropdown berubah
@@ -377,15 +377,11 @@ function initDragDrop(taskId) {
         placeholder: "sortable-placeholder",
         tolerance: "pointer",
         update: function(event, ui) {
-            // Ambil urutan baru
             var subtaskIds = [];
             $(this).find(".subtask-item").each(function() {
                 subtaskIds.push($(this).data("subtask-id"));
             });
             
-            console.log("Urutan baru:", subtaskIds);
-            
-            // Kirim ke server
             $.ajax({
                 url: baseUrl + "/api/update_subtask_order.php",
                 method: "POST",
@@ -396,15 +392,12 @@ function initDragDrop(taskId) {
                 dataType: "json",
                 success: function(response) {
                     if (response.success) {
-                        console.log("Urutan berhasil disimpan");
                         showNotification("Urutan subtasks berhasil diupdate", "success");
                     } else {
-                        console.error("Gagal simpan urutan:", response.message);
                         showNotification("Gagal menyimpan urutan", "danger");
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error("Error:", error);
+                error: function() {
                     showNotification("Gagal menyimpan urutan", "danger");
                 }
             });
@@ -426,6 +419,73 @@ function hideReplyForm(commentId) {
 }
 
 // ============================================
+// FUNGSI EDIT & HAPUS KOMENTAR
+// ============================================
+function showEditForm(commentId) {
+    $("#content-" + commentId).hide();
+    $("#edit-form-" + commentId).show();
+}
+
+function cancelEdit(commentId) {
+    $("#edit-form-" + commentId).hide();
+    $("#content-" + commentId).show();
+}
+
+function saveEdit(commentId) {
+    var newContent = $("#edit-form-" + commentId + " textarea").val().trim();
+    
+    if (!newContent) {
+        alert("Komentar tidak boleh kosong");
+        return;
+    }
+    
+    $.ajax({
+        url: baseUrl + "/api/edit_comment.php",
+        method: "POST",
+        data: {
+            comment_id: commentId,
+            komentar: newContent
+        },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                $("#content-" + commentId + " p").first().text(newContent);
+                $("#edit-form-" + commentId).hide();
+                $("#content-" + commentId).show();
+                showNotification("Komentar berhasil diupdate", "success");
+            } else {
+                alert("Gagal: " + response.message);
+            }
+        },
+        error: function() {
+            alert("Terjadi kesalahan");
+        }
+    });
+}
+
+function deleteComment(commentId) {
+    if (confirm("Yakin ingin menghapus komentar ini?")) {
+        $.ajax({
+            url: baseUrl + "/api/delete_comment.php",
+            method: "POST",
+            data: { comment_id: commentId },
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    $("#comment-" + commentId).closest(".comment-thread").remove();
+                    showNotification("Komentar berhasil dihapus", "success");
+                } else {
+                    alert("Gagal: " + response.message);
+                }
+            },
+            error: function() {
+                alert("Terjadi kesalahan");
+            }
+        });
+    }
+}
+
+// ============================================
 // FUNGSI SHOW ADD SUBTASK
 // ============================================
 function showAddSubtask(taskId) {
@@ -443,7 +503,6 @@ function deleteTask(taskId) {
             method: "POST",
             data: { task_id: taskId },
             dataType: "json",
-            timeout: 10000,
             success: function(response) {
                 if(response.success) {
                     location.reload();
@@ -451,8 +510,8 @@ function deleteTask(taskId) {
                     alert("Gagal: " + response.message);
                 }
             },
-            error: function(xhr, status, error) {
-                alert("Terjadi kesalahan: " + error);
+            error: function() {
+                alert("Terjadi kesalahan");
             }
         });
     }
@@ -468,7 +527,6 @@ function deleteSubtask(subtaskId) {
             method: "POST",
             data: { subtask_id: subtaskId },
             dataType: "json",
-            timeout: 10000,
             success: function(response) {
                 if(response.success) {
                     location.reload();
@@ -476,8 +534,8 @@ function deleteSubtask(subtaskId) {
                     alert("Gagal: " + response.message);
                 }
             },
-            error: function(xhr, status, error) {
-                alert("Terjadi kesalahan: " + error);
+            error: function() {
+                alert("Terjadi kesalahan");
             }
         });
     }
@@ -511,7 +569,6 @@ $(document).on("submit", ".add-comment-form", function(e) {
             link: link
         },
         dataType: "json",
-        timeout: 10000,
         success: function(response) {
             if (response.success) {
                 form.find("input[name=\"komentar\"]").val("");
@@ -522,9 +579,8 @@ $(document).on("submit", ".add-comment-form", function(e) {
                 alert("Gagal: " + response.message);
             }
         },
-        error: function(xhr, status, error) {
-            console.error("Error submit komentar:", error);
-            alert("Terjadi kesalahan: " + error);
+        error: function() {
+            alert("Terjadi kesalahan");
         },
         complete: function() {
             submitBtn.prop("disabled", false).html("Kirim");
@@ -560,7 +616,6 @@ $(document).on("submit", ".reply-form", function(e) {
             parent_id: parentId
         },
         dataType: "json",
-        timeout: 10000,
         success: function(response) {
             if (response.success) {
                 form.find("input[name=\"komentar\"]").val("");
@@ -571,9 +626,8 @@ $(document).on("submit", ".reply-form", function(e) {
                 alert("Gagal: " + response.message);
             }
         },
-        error: function(xhr, status, error) {
-            console.error("Error submit balasan:", error);
-            alert("Terjadi kesalahan: " + error);
+        error: function() {
+            alert("Terjadi kesalahan");
         },
         complete: function() {
             submitBtn.prop("disabled", false).html("Kirim");
@@ -585,27 +639,12 @@ $(document).on("submit", ".reply-form", function(e) {
 // FUNGSI NOTIFIKASI
 // ============================================
 function showNotification(message, type) {
-    // Tentukan class dan icon berdasarkan type
-    var bgClass = "";
-    var icon = "";
-    
-    switch(type) {
-        case "success":
-            bgClass = "alert-success";
-            icon = "bi-check-circle";
-            break;
-        case "danger":
-            bgClass = "alert-danger";
-            icon = "bi-exclamation-triangle";
-            break;
-        case "warning":
-            bgClass = "alert-warning";
-            icon = "bi-exclamation-circle";
-            break;
-        default:
-            bgClass = "alert-info";
-            icon = "bi-info-circle";
-    }
+    var bgClass = type == "success" ? "alert-success" : 
+                  type == "danger" ? "alert-danger" : 
+                  type == "warning" ? "alert-warning" : "alert-info";
+    var icon = type == "success" ? "bi-check-circle" : 
+               type == "danger" ? "bi-exclamation-triangle" : 
+               type == "warning" ? "bi-exclamation-circle" : "bi-info-circle";
     
     var alertHtml = "<div class=\"alert " + bgClass + " alert-dismissible fade show alert-sm py-2\" role=\"alert\">" +
                     "<i class=\"bi " + icon + " me-2\"></i>" + message +
@@ -627,9 +666,6 @@ function applyFilters() {
     var deadline = $("#filterDeadline").val();
     var search = $("#searchInput").val();
     
-    console.log("Filter:", {status, priority, deadline, search});
-    
-    // Tampilkan loading
     $("#tasks-container").html(
         "<div class=\"text-center py-5\">" +
         "<div class=\"spinner-border text-primary\" role=\"status\"></div>" +
@@ -646,31 +682,22 @@ function applyFilters() {
             search: search
         },
         dataType: "json",
-        timeout: 10000,
         success: function(response) {
-            console.log("Filter response:", response);
-            
-            // Update tasks container dengan HTML baru
             $("#tasks-container").html(response.tasks_html);
             
-            // Load subtasks untuk setiap task yang baru
             $(".subtask-list").each(function() {
                 var taskId = $(this).data("task-id");
                 loadSubtasks(taskId);
             });
             
-            // Tampilkan notifikasi hasil filter
             if (response.subtasks_count > 0) {
                 showNotification("Ditemukan " + response.subtasks_count + " tugas yang sesuai", "info");
             } else {
                 showNotification("Tidak ada tugas yang sesuai dengan filter", "warning");
             }
         },
-        error: function(xhr, status, error) {
-            console.error("Error filter:", error);
+        error: function() {
             showNotification("Gagal memfilter tugas", "danger");
-            
-            // Reload halaman sebagai fallback
             location.reload();
         }
     });
