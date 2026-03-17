@@ -1,0 +1,74 @@
+.card {
+    border-radius: 10px;
+    border: none;
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+/* Untuk drag & drop nanti */
+.subtask-item {
+    cursor: move;
+    transition: background-color 0.2s;
+}
+
+.subtask-item:hover {
+    background-color: #f8f9fa;
+}
+
+.subtask-item.dragging {
+    opacity: 0.5;
+    background-color: #e9ecef;
+}
+
+/* Status colors */
+.status-proses {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.status-selesai {
+    color: #198754;
+    font-weight: bold;
+}
+
+.status-evaluasi {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Priority colors */
+.priority-high {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.priority-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.priority-low {
+    color: #198754;
+    font-weight: bold;
+}
+
+/* Deadline warning */
+.deadline-danger {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.deadline-warning {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.deadline-normal {
+    color: #198754;
+}

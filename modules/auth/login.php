@@ -1,11 +1,14 @@
 <?php
 $page_title = 'Login';
-require_once '../../includes/header.php';
+require_once '../../includes/header.php';  // header.php sudah include functions.php
 
+// Cek apakah sudah login
 if (isLoggedIn()) {
-    header('Location: ../../dashboard.php');
+    header('Location: ' . base_url('dashboard.php'));
     exit();
 }
+
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn = getConnection();
@@ -29,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Catat activity log
             logActivity($user['id'], 'Login');
             
-            header('Location: ../../dashboard.php');
+            header('Location: ' . base_url('modules/dashboard.php'));
             exit();
         } else {
             $error = "Password salah!";
@@ -52,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="alert alert-success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
                 <?php endif; ?>
                 
-                <?php if (isset($error)): ?>
+                <?php if ($error): ?>
                     <div class="alert alert-danger"><?php echo $error; ?></div>
                 <?php endif; ?>
                 

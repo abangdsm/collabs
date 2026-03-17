@@ -1,9 +1,11 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once 'functions.php';
+// Hapus session_start() dari sini karena sudah di functions.php
+require_once 'functions.php';  // functions.php sudah ada session_start()
+
+// Cek apakah user login untuk menentukan tampilan navbar
+$isLoggedIn = isLoggedIn();
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -15,17 +17,17 @@ require_once 'functions.php';
     <link rel="stylesheet" href="<?php echo base_url(); ?>/assets/css/style.css">
 </head>
 <body>
-    <?php if (isLoggedIn()): ?>
+    <?php if ($isLoggedIn): ?>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?php echo base_url(); ?>/dashboard.php">Collabs</a>
+            <a class="navbar-brand" href="<?php echo base_url(); ?>/modules/dashboard.php">Collabs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo base_url(); ?>/dashboard.php">
+                        <a class="nav-link" href="<?php echo base_url(); ?>/modules/dashboard.php">
                             <i class="bi bi-house-door"></i> Dashboard
                         </a>
                     </li>
@@ -41,10 +43,10 @@ require_once 'functions.php';
                             <i class="bi bi-bell"></i>
                             <span class="badge bg-danger rounded-pill" id="notif-badge">0</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end" id="notif-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                            <h6 class="dropdown-header">Notifikasi</h6>
-                            <div id="notif-content">Loading...</div>
-                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end" id="notif-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                            <li><h6 class="dropdown-header">Notifikasi</h6></li>
+                            <li><div id="notif-content">Loading...</div></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
